@@ -687,9 +687,9 @@ class PhpEmitter extends Emitter {
 					$q = $q->alt;
 				} while ($q != null);
 			} else if ($p instanceof Option) {
-				$this->collect_states($state, $q->start, $set);
+				$this->collect_states($state, $p->start, $set);
 			} else if ($p instanceof Iteration) {
-				$this->collect_states($state, $q->start, $set);
+				$this->collect_states($state, $p->start, $set);
 			}
 			$p = $p->up ? null : $p->next;
 		}
