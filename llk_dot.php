@@ -109,7 +109,7 @@ function ast_to_dot($f, &$n, $p, $from, $to, $dump_mode, $style="") {
 function grammar_to_dots($grammar, $dump_mode = DOT_DUMP_AST) {
 	foreach ($grammar->nonterm as $name => $nt) {
 		if ($dump_mode == DOT_DUMP_GRAMMAR) {
-			$f = fopen("$name.dot", "w");
+			$f = fopen($name."_grammar.dot", "w");
 			fwrite($f, "digraph $name {\n");
 			fwrite($f, "\trankdir=LR;\n");
 			fwrite($f, "\t{rank=min; n1 [label=\"START\",shape=point,rank=min];}\n");
@@ -119,7 +119,7 @@ function grammar_to_dots($grammar, $dump_mode = DOT_DUMP_AST) {
 			fwrite($f, "}\n");
 			fclose($f);
 		} else if ($dump_mode == DOT_DUMP_AST) {
-			$f = fopen("$name.dot", "w");
+			$f = fopen($name."_ast.dot", "w");
 			fwrite($f, "digraph $name {\n");
 			fwrite($f, "\trankdir=LR;\n");
 			fwrite($f, "\t{rank=min; n1 [label=\"START\",shape=point,rank=min];}\n");

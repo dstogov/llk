@@ -1455,7 +1455,7 @@ function nterm_nfa($grammar, $nterm) {
 			dump_fa($grammar, "LA NFA $nterm", $nfa, true);
 		}
 		if (DUMP_DOT_LA_NFA) {
-			la_fa_to_dots($grammar, $nterm, $nfa, true);
+			la_fa_to_dots($grammar, $nterm . "_nfa", $nfa, true);
 		}
 		$grammar->la_nfa->n = $nfa->n + 1;
 		$grammar->la_nfa->move  += $nfa->move;
@@ -1493,6 +1493,9 @@ function try_to_resolve($grammar, $nt, $p, $syms, &$ambiguous) {
 			$t_states = substr($t_states, 0, strlen($t_states)-2);
 			dump_fa($grammar, "LA DFA $nt($t_states)", $dfa, true);
 		}
+		if (DUMP_DOT_LA_DFA) {
+			la_fa_to_dots($grammar, $nt . "_dfa_" . $p->state, $dfa, true);
+		}
 		minimize_dfa($dfa);
 		if (DUMP_LA_MIN_DFA) {
 			$t_states = "";
@@ -1501,6 +1504,9 @@ function try_to_resolve($grammar, $nt, $p, $syms, &$ambiguous) {
 			}
 			$t_states = substr($t_states, 0, strlen($t_states)-2);
 			dump_fa($grammar, "LA mDFA $nt($t_states)", $dfa, true);
+		}
+		if (DUMP_DOT_LA_MIN_DFA) {
+			la_fa_to_dots($grammar, $nt . "_min_dfa_" . $p->state, $dfa, true);
 		}
 		foreach ($states as $state => $dummy) {
 			if (!isset($grammar->la_dfa[$state])) {
@@ -2924,11 +2930,15 @@ for ($i = 1; $i < $argc; $i++) {
 		} else if ($argv[$i] == "--dump-la-min-dfa") {
 			define("DUMP_LA_MIN_DFA", true);
 		} else if ($argv[$i] == "--dump-dot-grammar") {
-			define("DUMP_DOT", DOT_DUMP_GRAMMAR);
+			define("DUMP_DOT_GRAMMAR", true);
 		} else if ($argv[$i] == "--dump-dot-ast") {
-			define("DUMP_DOT", DOT_DUMP_AST);
+			define("DUMP_DOT_AST", true);
 		} else if ($argv[$i] == "--dump-dot-la-nfa") {
 			define("DUMP_DOT_LA_NFA", true);
+		} else if ($argv[$i] == "--dump-dot-la-dfa") {
+			define("DUMP_DOT_LA_DFA", true);
+		} else if ($argv[$i] == "--dump-dot-la-min-dfa") {
+			define("DUMP_DOT_LA_MIN_DFA", true);
 		} else if ($argv[$i] == "--dump-first-follow") {
 			define("DUMP_FIRST_FOLLOW", true);
 		} else if ($argv[$i] == "--alt-dfa") {
@@ -2983,11 +2993,20 @@ if (!defined("DUMP_LA_DFA")) {
 if (!defined("DUMP_LA_MIN_DFA")) {
 	define("DUMP_LA_MIN_DFA", false);
 }
-if (!defined("DUMP_DOT")) {
-	define("DUMP_DOT", false);
+if (!defined("DUMP_DOT_GRAMMAR")) {
+	define("DUMP_DOT_GRAMMAR", false);
+}
+if (!defined("DUMP_DOT_AST")) {
+	define("DUMP_DOT_AST", false);
 }
 if (!defined("DUMP_DOT_LA_NFA")) {
 	define("DUMP_DOT_LA_NFA", false);
+}
+if (!defined("DUMP_DOT_LA_DFA")) {
+	define("DUMP_DOT_LA_DFA", false);
+}
+if (!defined("DUMP_DOT_LA_MIN_DFA")) {
+	define("DUMP_DOT_LA_MIN_DFA", false);
 }
 if (!defined("DUMP_FIRST_FOLLOW")) {
 	define("DUMP_FIRST_FOLLOW", false);
@@ -3051,8 +3070,11 @@ if ($ok) {
 			$ok &= test_left_recursion($grammar);
 			if (PROFILE) $t = end_test($t, "test_left_recursion");
 			if ($ok) {
-				if (DUMP_DOT) {
-					grammar_to_dots($grammar, DUMP_DOT);
+				if (DUMP_DOT_GRAMMAR) {
+					grammar_to_dots($grammar, DOT_DUMP_GRAMMAR);
+				}
+				if (DUMP_DOT_AST) {
+					grammar_to_dots($grammar, DOT_DUMP_AST);
 				}
 				comp_first_sets($grammar);
 				if (PROFILE) $t = end_test($t, "comp_first_sets");
