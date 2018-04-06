@@ -1,0 +1,14 @@
+--TEST--
+017 ambiguity (ambiguous repetitions)
+--CODE--
+s: a b c d f;
+a: ( 'a'+ )?;
+b: ( 'b'+ )*;
+c: ( 'c'+ )+;
+d: ( ('d'+|'e') )+;
+f: ( ('f'|) 'g'+ )+;
+--EXPECT--
+Ambiguous grammar in rule 'b': contents of (...)* or (...)+ must not be matched by a single repitition
+Ambiguous grammar in rule 'c': contents of (...)* or (...)+ must not be matched by a single repitition
+Ambiguous grammar in rule 'd': contents of (...)* or (...)+ must not be matched by a single repitition
+Ambiguous grammar in rule 'f': contents of (...)* or (...)+ must not be matched by a single repitition

@@ -1,0 +1,8 @@
+--TEST--
+001 Undefined non-terminal
+--CODE--
+start: 
+	test
+;
+--EXPECT--
+Nontermonal 'test' is used but never defined

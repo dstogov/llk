@@ -1,0 +1,16 @@
+--TEST--
+031 left recursion
+--CODE--
+start: 
+	test
+;
+test:
+	test1 'a' | 'b'
+;
+test1:
+	test 'c' | 'd'
+;
+--EXPECT--
+Indirect left recursion 'test' -> 'test1'
+Indirect left recursion 'test1' -> 'test'
+

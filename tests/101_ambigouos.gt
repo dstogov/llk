@@ -1,0 +1,6 @@
+--TEST--
+101 Ambiguous
+--CODE--
+start: 'x'? 'x'?;
+--EXPECT--
+LL(1) error in 'start': 'x' is the start & successor of nullable structure

@@ -1,0 +1,19 @@
+--TEST--
+403 LL regular
+--ARGS--
+--dump-la-min-dfa
+--CODE--
+s: ('x' a 'a' | 'x' a 'b');
+a: 'a' |;
+--EXPECT--
+LA mDFA s(0)
+0 -> 1: 'x'
+1 -> 2: 'a'
+1 -> 3: 'b' => 4
+2 -> 3: 'b' => 4
+2 -> 4: {'a',<EOF>} => 1
+LA mDFA a(10)
+0 -> 1: 'a'
+0 -> 2: 'b' => -1
+1 -> 2: <EOF> => -1
+1 -> 3: {'a','b'} => 11

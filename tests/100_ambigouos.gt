@@ -1,0 +1,6 @@
+--TEST--
+100 Ambiguous
+--CODE--
+start: 'x' | 'x';
+--EXPECT--
+LL(1) error in 'start': 'x' is the start of several alternatives.

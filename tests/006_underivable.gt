@@ -1,0 +1,12 @@
+--TEST--
+006 underivable nonterminal
+--CODE--
+start: 
+	test
+;
+test:
+	'(' test ')'
+;
+--EXPECT--
+Underivable nonterminal 'start'
+Underivable nonterminal 'test'

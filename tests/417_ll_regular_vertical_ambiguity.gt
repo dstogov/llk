@@ -1,0 +1,10 @@
+--TEST--
+417 LL regular (vertical ambiguity)
+--ARGS--
+--dump-la-min-dfa
+--CODE--
+a: b | c;
+b: c;
+c: "X";
+--EXPECT--
+LL(R) error in 'a': 'X' is the start of several alternatives.

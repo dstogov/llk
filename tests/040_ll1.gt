@@ -1,0 +1,11 @@
+--TEST--
+040 LL(1)
+--CODE--
+start: 
+	test
+;
+test:
+	'a' '+' | 'a' '-'
+;
+--EXPECT--
+LL(1) error in 'test': 'a' is the start of several alternatives.

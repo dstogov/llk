@@ -1,0 +1,8 @@
+--TEST--
+006 underivable nonterminal
+--CODE--
+a: 'a' b;
+b: 'b' a;
+--EXPECT--
+Underivable nonterminal 'a'
+Underivable nonterminal 'b'

@@ -1,0 +1,8 @@
+--TEST--
+102 Ambiguous
+--CODE--
+a: b | c;
+b: c;
+c: "X";
+--EXPECT--
+LL(1) error in 'a': 'X' is the start of several alternatives.

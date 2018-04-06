@@ -1,0 +1,19 @@
+--TEST--
+502 scanner (comment3)
+--ARGS--
+--dump-min-dfa
+--CODE--
+comment: /[ABCD]*?BCD/;
+--EXPECT--
+mDFA comment
+0 -> 1: ACD
+0 -> 2: B
+0 -> 3: <EOF> => <EOF>
+1 -> 1: ACD
+1 -> 2: B
+2 -> 1: AD
+2 -> 2: B
+2 -> 4: C
+4 -> 1: AC
+4 -> 2: B
+4 -> 5: D => comment

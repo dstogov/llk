@@ -1,0 +1,12 @@
+--TEST--
+010 ambiguity
+--CODE--
+start:
+	a
+;
+
+a:
+	( )? 'a'
+;
+--EXPECT--
+Ambiguous grammar in rule 'a': contents of (...)? must not be empty

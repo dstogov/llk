@@ -1,0 +1,10 @@
+--TEST--
+509 scanner (regexp regexp conflict)
+--ARGS--
+--dump-min-dfa
+--CODE--
+a: b | c;
+b: /[ij]f/;
+c: /i[a-f]/;
+--EXPECT--
+Ambigouos symbols b and c

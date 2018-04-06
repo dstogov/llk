@@ -1,0 +1,10 @@
+--TEST--
+418 LL regular (horizontal ambiguity)
+--ARGS--
+--dump-la-min-dfa
+--CODE--
+a: b c "Y";
+b: "X" ?;
+c: "X" ?;
+--EXPECT--
+LL(R) error in 'b': 'X' is the start & successor of nullable structure

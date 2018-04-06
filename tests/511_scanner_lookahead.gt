@@ -1,0 +1,38 @@
+--TEST--
+511 scanner lookahaed
+--ARGS--
+--run
+--CODE--
+%language       "php"
+%indent         "\t"
+
+%{
+function error($msg) {
+	throw new Exception("ERROR: $msg\n\n");
+}
+%}
+
+m2:
+	(
+		int
+	|	float
+	|	".." {echo "..\n";}
+	|	"." {echo ".\n";}
+	)*
+;
+int:	/[0-9]+//(\.\.)?/ { echo "int(" . get_text() . ")\n"; } ;
+float:	/[0-9]+\.[0-9]*/  { echo "float(" . get_text() . ")\n"; } ;
+
+%%
+
+$buf = "123..456";
+$pos  = 0;
+$len  = strlen($buf);
+$buf .= "\000";
+parse();
+echo "ok\n";
+--EXPECT--
+int(123)
+..
+int(456)
+ok

@@ -1,0 +1,16 @@
+--TEST--
+011 ambiguity
+--CODE--
+start:
+	a
+;
+
+a:
+	( b )? 'a'
+;
+
+b:
+	( 'b' )*
+;
+--EXPECT--
+Ambiguous grammar in rule 'a': contents of (...)? must not be matched by empty sequence

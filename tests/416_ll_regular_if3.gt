@@ -1,0 +1,21 @@
+--TEST--
+416 LL regular (ungready if)
+--ARGS--
+--dump-la-min-dfa
+--CODE--
+start:
+		( statement ) *
+;
+
+statement:
+		';'
+	|	'if' '(' expr ')' statement 
+	    ( 'else' statement ) ??
+	|	'empty' ';'
+;
+
+expr:
+		'0' | '1'
+;
+--EXPECT--
+WARNING: ungreedy conflict resolution is not supported in statement

@@ -1,0 +1,21 @@
+--TEST--
+423 LL regular (non strong LL(R), but full LL(R))
+--ARGS--
+--dump-la-min-dfa
+--CODE--
+start:	( x | y ) 'z' ;
+
+x:
+		"a" T_VAR
+	|	"a" T_VAR '=' 'c'
+;
+
+y:		T_VAR '=' 'c';
+
+T_VAR:	"v";
+--EXPECT--
+LA mDFA x(0)
+0 -> 1: 'a'
+1 -> 2: 'v'
+2 -> 3: 'z' => 1
+2 -> 4: '=' => 3

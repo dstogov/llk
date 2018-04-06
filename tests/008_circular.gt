@@ -1,0 +1,12 @@
+--TEST--
+008 direct circular derivation
+--CODE--
+start: 
+	test
+;
+test:
+	test | 'a'
+;
+--EXPECT--
+Circular derivation: test -> test
+

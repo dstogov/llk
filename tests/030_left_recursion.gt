@@ -1,0 +1,11 @@
+--TEST--
+030 left recursion
+--CODE--
+start: 
+	test
+;
+test:
+	test 'a' | 'b'
+;
+--EXPECT--
+Direct left recursion 'test' -> 'test'

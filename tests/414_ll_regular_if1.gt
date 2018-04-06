@@ -1,0 +1,21 @@
+--TEST--
+414 LL regular (if)
+--ARGS--
+--dump-la-min-dfa
+--CODE--
+start:
+		( statement ) *
+;
+
+statement:
+		';'
+	|	'if' '(' expr ')' statement 
+	    ( 'else' statement ) ?
+	|	'empty' ';'
+;
+
+expr:
+		'0' | '1'
+;
+--EXPECT--
+LL(R) error in 'statement': 'else' is the start & successor of nullable structure

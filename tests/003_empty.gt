@@ -1,0 +1,10 @@
+--TEST--
+003 empty non-terminal
+--CODE--
+start: 
+	test
+;
+test:
+;
+--EXPECT--
+Empty symbol: test

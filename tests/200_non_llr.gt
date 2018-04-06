@@ -1,0 +1,10 @@
+--TEST--
+200 non LL(r)
+--CODE--
+start:
+		('a' ':')* 'a' 'b'
+	|	('a' ':')* 'c'
+;
+--EXPECT--
+LL(1) error in 'start': 'a' is the start & successor of nullable structure
+LL(1) error in 'start': 'a' is the start of several alternatives.

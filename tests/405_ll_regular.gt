@@ -1,0 +1,11 @@
+--TEST--
+405 LL regular 'a'? 'a'
+--ARGS--
+--dump-la-min-dfa
+--CODE--
+s: 'a'? 'a' 'b';
+--EXPECT--
+LA mDFA s(0)
+0 -> 1: 'a'
+1 -> 2: 'a' => 1
+1 -> 3: 'b' => 2

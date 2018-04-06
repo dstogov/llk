@@ -1,0 +1,12 @@
+--TEST--
+420 LL regular (tail recursion)
+--ARGS--
+--dump-la-min-dfa
+--CODE--
+s: a "X" | a "Y";
+a: ("Z" a)?;
+--EXPECT--
+LA mDFA s(0)
+0 -> 0: 'Z'
+0 -> 2: 'X' => 1
+0 -> 3: 'Y' => 3

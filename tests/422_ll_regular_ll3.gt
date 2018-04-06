@@ -1,0 +1,16 @@
+--TEST--
+422 LL regular (LL3)
+--ARGS--
+--dump-la-min-dfa
+--CODE--
+s: 'a' s a | ;
+a: 'a' 'a' 'b' s | 'c' ;
+--EXPECT--
+LA mDFA s(0)
+0 -> 1: 'a'
+0 -> 2: {'c',<EOF>} => -1
+1 -> 4: 'a'
+1 -> 5: 'c' => 1
+4 -> 2: 'b' => -1
+4 -> 5: {'a','c'} => 1
+

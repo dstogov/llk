@@ -1,0 +1,21 @@
+--TEST--
+008 indirect circular derivation
+--CODE--
+start: 
+	test
+;
+test:
+	test1 | 'a'
+;
+
+test1:
+	test2 | 'b'
+;
+
+test2:
+	test | 'c'
+;
+--EXPECT--
+Circular derivation: test -> test1
+Circular derivation: test1 -> test2
+Circular derivation: test2 -> test

@@ -1,0 +1,13 @@
+--TEST--
+500 scanner (comment1)
+--ARGS--
+--dump-min-dfa
+--CODE--
+comment: /[AB]*?B/; 
+--EXPECT--
+mDFA comment
+0 -> 1: A
+0 -> 2: B => comment
+0 -> 3: <EOF> => <EOF>
+1 -> 1: A
+1 -> 2: B => comment

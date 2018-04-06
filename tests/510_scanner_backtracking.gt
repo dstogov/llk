@@ -1,0 +1,38 @@
+--TEST--
+510 scanner backtracking
+--ARGS--
+--run
+--CODE--
+%language       "php"
+%indent         "\t"
+
+%{
+function error($msg) {
+	throw new Exception("ERROR: $msg\n\n");
+}
+%}
+
+back:
+	(
+		"int"    { echo "int\n"; }
+	|	"in"     { echo "in\n"; }
+	|	"("      { echo "(\n"; }
+	|	")"      { echo ")\n"; }
+	|	"(int)"  { echo "(int)\n"; }
+	)*
+;
+
+%%
+
+$buf = "(int)(in)";
+$pos  = 0;
+$len  = strlen($buf);
+$buf .= "\000";
+parse();
+echo "ok\n";
+--EXPECT--
+(int)
+(
+in
+)
+ok

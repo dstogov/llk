@@ -1,0 +1,8 @@
+--TEST--
+015 ambiguity
+--CODE--
+start:
+	 | | 'c'
+;
+--EXPECT--
+Ambiguous grammar in rule 'start': at most one alternative must be empty
