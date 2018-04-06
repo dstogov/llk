@@ -38,9 +38,6 @@ function run_test($test, $name, $code, $expect, $opt) {
 	if (!@file_put_contents($gramma, $code)) {
 		return false;
 	}
-	if ($opt == "") {
-		$opt = "--ll1";
-	}
 	if (@system("php llk.php $opt $gramma > $output") != 0) {
 		return false;
 	}

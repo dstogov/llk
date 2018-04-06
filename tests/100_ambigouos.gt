@@ -3,4 +3,4 @@
 --CODE--
 start: 'x' | 'x';
 --EXPECT--
-LL(1) error in 'start': 'x' is the start of several alternatives.
+LL(R) error in 'start': 'x' is the start of several alternatives.

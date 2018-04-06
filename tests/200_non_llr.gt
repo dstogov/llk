@@ -1,5 +1,7 @@
 --TEST--
 200 non LL(r)
+--ARGS--
+--ll1
 --CODE--
 start:
 		('a' ':')* 'a' 'b'

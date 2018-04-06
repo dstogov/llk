@@ -1,7 +1,7 @@
 --TEST--
-040 LL(1)
+042 LL(1)
 --ARGS--
---ll1
+-v
 --CODE--
 start: 
 	test
@@ -10,4 +10,4 @@ test:
 	'a' '+' | 'a' '-'
 ;
 --EXPECT--
-LL(1) error in 'test': 'a' is the start of several alternatives.
+LL(1) warning in 'test': 'a' is the start of several alternatives.

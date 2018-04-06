@@ -1,0 +1,13 @@
+--TEST--
+043 LL(1)
+--ARGS--
+-v
+--CODE--
+start: 
+	test
+;
+test:
+	('a')* 'a'
+;
+--EXPECT--
+LL(1) warning in 'test': 'a' is the start & successor of nullable structure

@@ -1,5 +1,7 @@
 --TEST--
 041 LL(1)
+--ARGS--
+--ll1
 --CODE--
 start: 
 	test
