@@ -1455,7 +1455,7 @@ function nterm_nfa($grammar, $nterm) {
 			dump_fa($grammar, "LA NFA $nterm", $nfa, true);
 		}
 		if (DUMP_DOT_LA_NFA) {
-			la_fa_to_dots($grammar, $nterm . "_nfa", $nfa, true);
+			la_fa_to_dots($grammar, $nterm . "_nfa", $nfa, true, false);
 		}
 		$grammar->la_nfa->n = $nfa->n + 1;
 		$grammar->la_nfa->move  += $nfa->move;
@@ -1494,7 +1494,7 @@ function try_to_resolve($grammar, $nt, $p, $syms, &$ambiguous) {
 			dump_fa($grammar, "LA DFA $nt($t_states)", $dfa, true);
 		}
 		if (DUMP_DOT_LA_DFA) {
-			la_fa_to_dots($grammar, $nt . "_dfa_" . $p->state, $dfa, true);
+			la_fa_to_dots($grammar, $nt . "_dfa_" . $p->state, $dfa, true, $p->state);
 		}
 		minimize_dfa($dfa);
 		if (DUMP_LA_MIN_DFA) {
@@ -1506,7 +1506,7 @@ function try_to_resolve($grammar, $nt, $p, $syms, &$ambiguous) {
 			dump_fa($grammar, "LA mDFA $nt($t_states)", $dfa, true);
 		}
 		if (DUMP_DOT_LA_MIN_DFA) {
-			la_fa_to_dots($grammar, $nt . "_min_dfa_" . $p->state, $dfa, true);
+			la_fa_to_dots($grammar, $nt . "_min_dfa_" . $p->state, $dfa, true, $p->state);
 		}
 		foreach ($states as $state => $dummy) {
 			if (!isset($grammar->la_dfa[$state])) {

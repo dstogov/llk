@@ -131,7 +131,7 @@ function grammar_to_dots($grammar, $dump_mode = DOT_DUMP_AST) {
 	}
 }
 
-function la_fa_to_dots($grammar, $name, $fa, $term=false) {
+function la_fa_to_dots($grammar, $name, $fa, $term=false, $start_state) {
 	$states = [];
 	$f = fopen("$name.dot", "w");
 	fwrite($f, "digraph $name {\n");
@@ -141,7 +141,10 @@ function la_fa_to_dots($grammar, $name, $fa, $term=false) {
 	$n = 3;
 
 	$states[$fa->start] = $n;
-	fwrite($f, "\tn$n [label=\"$fa->start\",shape=diamond];\n");
+	if ($start_state === false) {
+		$start_state = $fa->start;
+	}
+	fwrite($f, "\tn$n [label=\"$start_state\",shape=diamond];\n");
 	fwrite($f, "\tn1 -> n$n;\n");
 	$n++;
 
