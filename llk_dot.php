@@ -85,12 +85,17 @@ function ast_to_dot($f, &$n, $p, $from, $to, $dump_mode, $style="", $color="") {
 				fwrite($f, "\tn$from -> n$n$style;\n");
 				$it_from = $n;
 				$n++;
-				fwrite($f, "\tn$n [label=\"\",shape=point];\n");
-				fwrite($f, "\tn$it_from -> n$n;\n");
-				$it_to = $n;
-				$n++;
-				ast_to_dot($f, $n, $p->start, $it_from, $it_to, $dump_mode, " [style=dotted]", " [color=grey]");
-				$from = $it_to;
+				if ($p->min_count == 0) {
+					ast_to_dot($f, $n, $p->start, $it_from, $it_from, $dump_mode, " [style=dotted]", " [color=grey]");
+					$from = $it_from;
+				} else {
+					fwrite($f, "\tn$n [label=\"\",shape=point];\n");
+					$it_to = $n;
+					$n++;
+					ast_to_dot($f, $n, $p->start, $it_from, $it_to, $dump_mode, " [style=dotted]");
+					fwrite($f, "\tn$it_to -> n$it_from [color=grey];\n");
+					$from = $it_to;
+				}
 			} else {
 				fwrite($f, "\tn$n [label=\"\",shape=point];\n");
 				fwrite($f, "\tn$from -> n$n$style;\n");
