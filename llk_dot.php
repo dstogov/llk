@@ -2,7 +2,7 @@
 const DOT_DUMP_GRAMMAR = 1;
 const DOT_DUMP_AST     = 2;
 
-function ast_to_dot($f, &$n, $p, $from, $to, $dump_mode, $style="") {
+function ast_to_dot($f, &$n, $p, $from, $to, $dump_mode, $style="", $color="") {
 	while ($p != null) {
 		if ($p instanceof Terminal) {
 			fwrite($f, "\tn$n [label=\"$p->name\",style=bold,shape=ellipse];\n");
@@ -26,18 +26,22 @@ function ast_to_dot($f, &$n, $p, $from, $to, $dump_mode, $style="") {
 			$alt_from = $n;
 			$n++;
 			if ($dump_mode == DOT_DUMP_AST) {
+				fwrite($f, "\tn$n [label=\"\",shape=point];\n");
+				fwrite($f, "\tn$alt_from -> n$n;\n");
+				$alt_to = $n;
+				$n++;
 				$q = $p;
 				while ($q != null) { /*for all alternatives*/
-					ast_to_dot($f, $n, $q->start, $alt_from, -1, $dump_mode, " [style=dotted]");
+					ast_to_dot($f, $n, $q->start, $alt_from, $alt_to, $dump_mode, " [style=dotted]", " [color=grey]");
 					$q = $q->alt;
 					if ($q != null) {
 						fwrite($f, "\tn$n [label=\"Alternative\",shape=diamond];\n");
-						fwrite($f, "\tn$alt_from -> n$n;\n");
+						fwrite($f, "\tn$alt_from -> n$n [style=dashed];\n");
 						$alt_from = $n;
 						$n++;
 					}
 				}
-				$from = $alt_from;
+				$from = $alt_to;
 			} else {
 				fwrite($f, "\tn$n [label=\"\",shape=point];\n");
 				$alt_to = $n;
@@ -60,8 +64,12 @@ function ast_to_dot($f, &$n, $p, $from, $to, $dump_mode, $style="") {
 			$opt_from = $n;
 			$n++;
 			if ($dump_mode == DOT_DUMP_AST) {
-				ast_to_dot($f, $n, $p->start, $opt_from, -1, $dump_mode, " [style=dotted]");
-				$from = $opt_from;
+				fwrite($f, "\tn$n [label=\"\",shape=point];\n");
+				fwrite($f, "\tn$opt_from -> n$n;\n");
+				$opt_to = $n;
+				$n++;
+				ast_to_dot($f, $n, $p->start, $opt_from, $opt_to, $dump_mode, " [style=dotted]", " [color=grey]");
+				$from = $opt_to;
 			} else {
 				fwrite($f, "\tn$n [label=\"\",shape=point];\n");
 				$opt_to = $n;
@@ -77,8 +85,12 @@ function ast_to_dot($f, &$n, $p, $from, $to, $dump_mode, $style="") {
 				fwrite($f, "\tn$from -> n$n$style;\n");
 				$it_from = $n;
 				$n++;
-				ast_to_dot($f, $n, $p->start, $it_from, -1, $dump_mode, " [style=dotted]");
-				$from = $it_from;
+				fwrite($f, "\tn$n [label=\"\",shape=point];\n");
+				fwrite($f, "\tn$it_from -> n$n;\n");
+				$it_to = $n;
+				$n++;
+				ast_to_dot($f, $n, $p->start, $it_from, $it_to, $dump_mode, " [style=dotted]", " [color=grey]");
+				$from = $it_to;
 			} else {
 				fwrite($f, "\tn$n [label=\"\",shape=point];\n");
 				fwrite($f, "\tn$from -> n$n$style;\n");
@@ -97,11 +109,19 @@ function ast_to_dot($f, &$n, $p, $from, $to, $dump_mode, $style="") {
 				$from = $it_to;
 			}
 			$style = "";
-		} else if ($dump_mode == DOT_DUMP_AST) {
+		} else if ($p instanceof Epsilon) {
+			if ($dump_mode == DOT_DUMP_AST) {
+				fwrite($f, "\tn$n [label=\"Epsilon\",shape=diamond];\n");
+				fwrite($f, "\tn$from -> n$n$style;\n");
+				$from = $n;
+				$n++;
+			}
 		}
 		$p = $p->up ? null : $p->next;
 	}
-	if ($dump_mode != DOT_DUMP_AST) {
+	if ($dump_mode == DOT_DUMP_AST) {
+		fwrite($f, "\tn$from -> n$to$color;\n");
+	} else {
 		fwrite($f, "\tn$from -> n$to;\n");
 	}
 }
@@ -123,8 +143,9 @@ function grammar_to_dots($grammar, $dump_mode = DOT_DUMP_AST) {
 			fwrite($f, "digraph $name {\n");
 			fwrite($f, "\trankdir=LR;\n");
 			fwrite($f, "\t{rank=min; n1 [label=\"START\",shape=point,rank=min];}\n");
-		  	$n = 2;
-			ast_to_dot($f, $n, $nt->ast, 1, -1, $dump_mode);
+			fwrite($f, "\t{rank=max; n2 [label=\"END\",shape=point,rank=max];}\n");
+			$n = 3;
+			ast_to_dot($f, $n, $nt->ast, 1, 2, $dump_mode);
 			fwrite($f, "}\n");
 			fclose($f);
 		}
