@@ -673,7 +673,8 @@ class PhpEmitter extends Emitter {
 	}
 
 	function collect_states($state, $p, &$set) {
-		while ($p != null && $p instanceof Epsilon && $p->state == $state) {
+		while ($p != null &&
+		       ($p instanceof Epsilon || $p instanceof Action || $p instanceof Predicate)) {
 			$p = $p->next;
 		}
 		while ($p != null) {
