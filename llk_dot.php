@@ -145,12 +145,17 @@ function la_fa_to_dots($grammar, $name, $fa, $term=false) {
 	fwrite($f, "\tn1 -> n$n;\n");
 	$n++;
 
-	foreach($fa->final as $s => $dummy) {
+	foreach($fa->final as $s => $state) {
 		if (isset($states[$s])) {
 			$sn = $states[$s];
 		} else {
+			if (is_object($state)) {
+				$label = $s;
+			} else {
+				$label = $state;
+			}
 			$states[$s] = $sn = $n;
-			fwrite($f, "\tn$n [label=\"$s\",shape=diamond];\n");
+			fwrite($f, "\tn$n [label=\"$label\",shape=diamond];\n");
 			$n++;
 		}
 		fwrite($f, "\tn$sn -> n2;\n");
@@ -214,7 +219,7 @@ function la_fa_to_dots($grammar, $name, $fa, $term=false) {
 										$shape = "box";
 									} else {
 										$label = $c;
-										$shape = "elipse";
+										$shape = "ellipse";
 									}
 								}
 							} else {
@@ -224,7 +229,7 @@ function la_fa_to_dots($grammar, $name, $fa, $term=false) {
 										chr((($i >> 6) & 3) + ord('0')) .
 										chr((($i >> 3) & 7) + ord('0')) .
 										chr(($i & 7) + ord('0'));
-									$shape = "elipse";
+									$shape = "ellipse";
 								} else {
 									$label = $c;
 									$shape = "ellipse";
@@ -240,7 +245,7 @@ function la_fa_to_dots($grammar, $name, $fa, $term=false) {
 			} else if ($s !== null) {
 				if ($s instanceof RegExp) {
 					$label = $s->name;
-					$shape = "elipse";
+					$shape = "ellipse";
 				} else { /* string */
 					if ($term) {
 						if (strpos($s, "nt:") === 0) {
