@@ -1928,7 +1928,7 @@ function parse_regex_alt($sym, &$gl, &$gr) {
 			$sym = parse_regex_term($sym, $gl2, $gr2);
 			set_ctx($gl2); concat_seq($gl, $gr, $gl2, $gr2);
 		}
-	} else if ($sym == YY__BAR || $sym == YY__RPAREN || $sym == YY__SLASH) {
+	} else {
 		$gl = $gr = new Epsilon();
 	}
 	return $sym;
