@@ -210,6 +210,7 @@ class FA {
 }
 class Grammar {
 	public $start = null;
+	public $sub_start = array();
 	public $case_sensetive = true;
 	public $global_vars = true;
 	public $lineno = true;
@@ -927,6 +928,11 @@ function complete($grammar, $nt0, $nt, $p, $visit, &$follow_nt) {
 function comp_follow_sets($grammar) {
 	$visit = visit_number();
 	$follow_nt = array();
+	$grammar->nonterm[$grammar->start]->follow = array("<EOF>" => 1);
+	// TODO: allowing <EOF> may be incorrect ???
+	foreach ($grammar->sub_start as $start) {
+		$grammar->nonterm[$start]->follow = array("<EOF>" => 1);
+	}
 	foreach ($grammar->nonterm as $name => $nt) { /*get direct successors of nonterminals*/
  		comp_follow($grammar, $name, $nt->ast, $visit, $follow_nt);
 	}
@@ -2260,7 +2266,7 @@ function build_nfa($grammar, $nterm, $scan) {
 	}
 	// Add follow symbols
 	foreach ($scan->follow as $t => $dummy) {
-		if (!isset($term[$t]) && isset($grammar->term[$t])) {
+		if (!isset($term[$t]) && isset($grammar->term[$t]) && !$grammar->term[$t]->special) {
 			nfa_add_term($nfa, $grammar->term[$t], $grammar->case_sensetive);
 		}
 	}

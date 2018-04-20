@@ -13,6 +13,7 @@ grammar($grammar):
 
 declaration($grammar):
 		"%start" ident($id)      { $grammar->start = $id; }
+	|	"%sub-start" ident($id)  { $grammar->sub_start[] = $id; }
 	|	"%case-sensetive"
 	    (
 	    	"true"               { $grammar->case_sensetive = true; }
