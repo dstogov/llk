@@ -2684,9 +2684,7 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 				}
 				$q = $q->alt;
 			}
-			if ($p->next == null) {
-				$f->parser_end_if();
-			} else if ($use_switch) {
+			if ($use_switch) {
 				$f->parser_unexpected_case($in_pred);
 				if ($p->has_pred) {
 //???					$f->dec_indent($indent);

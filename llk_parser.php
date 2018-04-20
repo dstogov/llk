@@ -1507,6 +1507,8 @@ function parse_declaration($sym, $grammar) {
 			} else if ($sym == YY_FALSE) {
 				$sym = get_sym();
 				$grammar->case_sensetive = false;
+			} else {
+				error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 			}
 			break;
 		case YY__PERCENT_g_l_o_b_a_l_MINUS_v_a_r_s:
@@ -1517,6 +1519,8 @@ function parse_declaration($sym, $grammar) {
 			} else if ($sym == YY_FALSE) {
 				$sym = get_sym();
 				$grammar->global_vars = false;
+			} else {
+				error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 			}
 			break;
 		case YY__PERCENT_l_i_n_e_n_o:
@@ -1527,6 +1531,8 @@ function parse_declaration($sym, $grammar) {
 			} else if ($sym == YY_FALSE) {
 				$sym = get_sym();
 				$grammar->lineno = false;
+			} else {
+				error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 			}
 			break;
 		case YY__PERCENT_o_u_t_p_u_t:
@@ -1549,6 +1555,8 @@ function parse_declaration($sym, $grammar) {
 			$sym = parse_string($sym, $s);
 			$grammar->prefix = $s;
 			break;
+		default:
+			error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 	}
 	return $sym;
 }
@@ -1769,6 +1777,8 @@ function parse_term($sym, $grammar, &$gl, &$gr) {
 				$sym = get_sym();
 				make_iter(0, $gl, $gr, false);
 				break;
+			default:
+				error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 		}
 	}
 	return $sym;
@@ -1791,6 +1801,8 @@ function parse_factor($sym, $grammar, &$gl, &$gr) {
 			error("')' expected, got '{$GLOBALS['sym_name'][$sym]}'");
 		}
 		$sym = get_sym();
+	} else {
+		error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 	}
 	return $sym;
 }
@@ -1930,6 +1942,8 @@ function parse_regex_alt($sym, &$gl, &$gr) {
 		}
 	} else if ($sym == YY__BAR || $sym == YY__RPAREN || $sym == YY__SLASH) {
 		$gl = $gr = new Epsilon();
+	} else {
+		error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 	}
 	return $sym;
 }
@@ -1974,6 +1988,8 @@ function parse_regex_term($sym, &$gl, &$gr) {
 				$sym = regexp2_get_sym();
 				make_iter(0, $gl, $gr, false);
 				break;
+			default:
+				error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 		}
 	}
 	return $sym;
@@ -2006,6 +2022,8 @@ function parse_regex_factor($sym, &$gl, &$gr) {
 			error("')' expected, got '{$GLOBALS['sym_name'][$sym]}'");
 		}
 		$sym = regexp2_get_sym();
+	} else {
+		error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 	}
 	return $sym;
 }
@@ -2017,6 +2035,8 @@ function parse_regex_char($sym, &$ch) {
 		$sym = parse_escape_code($sym, $ch);
 	} else if ($sym == YY_SINGLE_CHAR) {
 		$sym = parse_single_char($sym, $ch);
+	} else {
+		error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 	}
 	return $sym;
 }
