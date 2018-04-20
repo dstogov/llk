@@ -2662,14 +2662,7 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 			while ($q != null) {
 				if (!($q->start instanceof Predicate)) {
 					$set = comp_expected($grammar, $q->start, $nt);
-					if ($q->alt == null && $p->next == null && empty_subgraph($q->start)) {
-						if ($use_switch) {
-							$f->parser_start_default();
-						} else {
-							$f->parser_else_condition($first);
-							$first = false;
-						}
-					} else if ($use_dfa) {
+					if ($use_dfa) {
 						if ($use_switch) {
 							$f->parser_start_alt_case($p->state, $q->start);
 						} else {

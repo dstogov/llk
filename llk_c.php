@@ -1041,18 +1041,6 @@ class CEmitter extends Emitter {
 		$this->inc_indent();
 	}
 
-	function parser_else_condition($first = true) {
-		if ($first) {
-			$this->indent();
-			$this->write("if (1) {\n");
-		} else {
-			$this->dec_indent();
-			$this->indent();
-			$this->write("} else {\n");
-		}
-		$this->inc_indent();
-	}
-
 	function parser_alt_if_condition($start, $state, $first = true) {
 		if ($first) {
 			$this->indent();
@@ -1145,12 +1133,6 @@ class CEmitter extends Emitter {
 			$this->indent();
 			$this->write("case " . $this->grammar->term[$sym]->const_name . ":\n");
 		}
-		$this->inc_indent();
-	}
-
-	function parser_start_default() {
-		$this->indent();
-		$this->write("default:\n");
 		$this->inc_indent();
 	}
 
