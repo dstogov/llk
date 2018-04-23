@@ -899,11 +899,15 @@ class CEmitter extends Emitter {
 		$this->dec_indent();
 	}
 
-	function la_state_else_error() {
+	function la_state_else_error($check_only) {
 		$this->indent();
 		$this->write("} else {\n");
 		$this->indent(1);
-		$this->write("yy_error_sym(\"unexpected '%s'\", sym2);\n");
+		if ($check_only) {
+			$this->write("return -1;\n");
+		} else {
+			$this->write("yy_error_sym(\"unexpected '%s'\", sym2);\n");
+		}
 		$this->indent();
 		$this->write("}\n");
 	}
@@ -1017,8 +1021,10 @@ class CEmitter extends Emitter {
 	}
 
 	function parser_condition($set, $pred = null) {
-		$this->write($this->gen_condition($set));
-		if ($pred !== null) {
+		if ($pred === null) {
+			$this->write($this->gen_condition($set));
+		} else {
+			$this->write("(" . $this->gen_condition($set) . ")");
 			if ($pred instanceof SyntaticPredicate) {
 				$this->write(" && " . ($pred->neg ? "!" : "") . $pred->name . "(sym)");
 			} else {
@@ -1158,7 +1164,7 @@ class CEmitter extends Emitter {
 		$this->write("} else {\n");
 		$this->indent(1);
 		if ($check_only) {
-			$this->write("return false;\n");
+			$this->write("return -1;\n");
 		} else {
 			$this->write("yy_error_sym(\"unexpected '%s'\", sym);\n");
 		}
@@ -1171,7 +1177,7 @@ class CEmitter extends Emitter {
 		$this->write("default:\n");
 		$this->indent(1);
 		if ($check_only) {
-			$this->write("return false;\n");
+			$this->write("return -1;\n");
 		} else {
 			$this->write("yy_error_sym(\"unexpected '%s'\", sym);\n");
 		}
@@ -1212,26 +1218,53 @@ class CEmitter extends Emitter {
 		$this->write("}\n\n");
 	}
 
-	function synpred($grammar, $pred, $scan) {
-		if (!$pred->start instanceof NonTerminal ||
-		    $pred->start->next != null) {
-			$this->write("function check_" . $pred->name . "(sym) {\n");
-			$this->gen_ast($grammar, $pred->name, "\t", $pred->start, array(), $scan, true);
-			$this->write("\treturn sym;\n");
-			$this->write("}\n\n");
-		}
-		$this->write("function " . $pred->name . "(sym) {\n");
-		$this->write("\tglobal \$pos, \$text, \$line;\n");
-		$this->write("\n");
-		$this->save_pos();
-		if (!$pred->start instanceof NonTerminal ||
-		    $pred->start->next != null) {
-			$this->write("\tsym = check_" . $pred->name . "(sym);\n");
-		} else {
-			$this->write("\tsym = check_" . $pred->start->name . "(sym);\n");
-		}
-		$this->restore_pos();
-		$this->write("\treturn (sym !== false);\n");
+	function parser_forward_synpred($name) {
+		$this->indent();
+		$this->write("static int $name(int sym);\n");
+	}
+
+	function parser_synpred_start($pred) {
+		$this->indent();
+		$this->write("static int _{$pred->name}(int sym) {\n");
+		$this->inc_indent();
+	}
+
+	function parser_synpred_end($pred) {
+		$this->indent();
+		$this->write("return sym;\n");
+		$this->dec_indent();
+		$this->indent();
 		$this->write("}\n\n");
 	}
+
+	function parser_synpred($pred) {
+		$this->indent();
+		$this->write("static int {$pred->name}(int sym) {\n");
+		$this->inc_indent();
+		$this->indent();
+		$this->write("int ret;\n");
+		$this->indent();
+		$this->write("const unsigned char *save_pos;\n");
+		$this->indent();
+		$this->write("const unsigned char *save_text;\n");
+		if ($this->lineno) {
+			$this->indent();
+			$this->write("int   save_line;\n");
+		}
+		$this->write("\n");
+		$this->save_pos();
+		$this->indent();
+		if (!$pred->start instanceof NonTerminal ||
+		    $pred->start->next != null) {
+			$this->write("ret = _{$pred->name}(sym) != -1;\n");
+		} else {
+			$this->write("ret = check_" . $pred->start->name . "(sym) != -1;\n");
+		}
+		$this->restore_pos();
+		$this->indent();
+		$this->write("return ret;\n");
+		$this->dec_indent();
+		$this->write("}\n\n");
+	}
+
 }

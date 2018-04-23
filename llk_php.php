@@ -1143,6 +1143,42 @@ class PhpEmitter extends Emitter {
 		$this->write("}\n\n");
 	}
 
+	function parser_synpred_start($pred) {
+		$this->indent();
+		$this->write("function _{$pred->name}($sym) {\n");
+		$this->inc_indent();
+	}
+
+	function parser_synpred_end($pred) {
+		$this->indent();
+		$this->write("return $sym;\n");
+		$this->dec_indent();
+		$this->indent();
+		$this->write("}\n\n");
+	}
+
+	function parser_synpred($pred) {
+		$this->indent();
+		$this->write("function {$pred->name}($sym) {\n");
+		$this->inc_indent();
+		$this->indent();
+		$this->write("\tglobal \$pos, \$text, \$line;\n");
+		$this->write("\n");
+		$this->save_pos();
+		$this->indent();
+		if (!$pred->start instanceof NonTerminal ||
+		    $pred->start->next != null) {
+			$this->write("$ret = _{$pred->name}(sym) != false;\n");
+		} else {
+			$this->write("$ret = check_" . $pred->start->name . "(sym) != false;\n");
+		}
+		$this->restore_pos();
+		$this->indent();
+		$this->write("return $ret;\n");
+		$this->dec_indent();
+		$this->write("}\n\n");
+	}
+
 	function synpred($grammar, $pred, $scan) {
 		if (!$pred->start instanceof NonTerminal ||
 		    $pred->start->next != null) {

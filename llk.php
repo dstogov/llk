@@ -30,6 +30,7 @@ class NonTerminal extends Node {
 class Alternative extends Node {
 	public $start = null;
 	public $alt = null;
+	public $has_pred = 0;
 	function __construct($start, $alt) {$this->start = $start; $this->alt = $alt;}
 }
 class Option extends Node {
@@ -394,18 +395,18 @@ function test_undefined_nterm($grammar) {
 	return $ok;
 }
 
-function traverse_nt($grammar, $nt, $visit, $flag) {
+function traverse_nt($grammar, $nt, $visit, $flag, $with_pred) {
 	$nt->flags |= $flag | IS_VISITED;
 	if ($nt->ast->visited != $visit) {
 		$nt->ast->visited = $visit;
-		if (traverse($grammar, $nt->name, $nt->ast, $visit, $flag)) {
+		if (traverse($grammar, $nt->name, $nt->ast, $visit, $flag, $with_pred)) {
 			$nt->flags |= IS_EMPTY;
 		}
 	}
 	$nt->flags &= ~IS_VISITED;
 }
 
-function traverse($grammar, $nterm, $node, $visit, $flag) {
+function traverse($grammar, $nterm, $node, $visit, $flag, $with_pred) {
 	$empty = true;
 	while ($node != null) {
 		if ($node instanceof Terminal ||
@@ -415,26 +416,32 @@ function traverse($grammar, $nterm, $node, $visit, $flag) {
 		} else if ($node instanceof NonTerminal) {
 			if (isset($grammar->nonterm[$node->name])) {
 				$nt = $grammar->nonterm[$node->name];
-				$nt->occurance[] = array($nterm, $node);
+				if (!$with_pred) {
+					$nt->occurance[] = array($nterm, $node);
+				}
 				if ($nt->flags & IS_VISITED) {
-					$nt->flags |= IS_RECURSIVE;
+					if (!$with_pred) {
+						$nt->flags |= IS_RECURSIVE;
+					}
 				} else {
-					traverse_nt($grammar, $nt, $visit, $flag);
+					traverse_nt($grammar, $nt, $visit, $flag, $with_pred);
 				}
 			}
 			$empty = false;
 		} else if ($node instanceof Alternative) {
 			$q = $node;
 			do {
-				$empty &= traverse($grammar, $nterm, $q->start, $visit, $flag);
+				$empty &= traverse($grammar, $nterm, $q->start, $visit, $flag, $with_pred);
 				$q = $q->alt;
 			} while ($q !== null);
 		} else if ($node instanceof Option) {
-			$empty &= traverse($grammar, $nterm, $node->start, $visit, $flag);
+			$empty &= traverse($grammar, $nterm, $node->start, $visit, $flag, $with_pred);
 		} else if ($node instanceof Iteration) {
-			$empty &= traverse($grammar, $nterm, $node->start, $visit, $flag);
+			$empty &= traverse($grammar, $nterm, $node->start, $visit, $flag, $with_pred);
 		} else if ($node instanceof SyntaticPredicate) {
-			traverse($grammar, $nterm, $node->start, $visit, ($flag | IS_USED_IN_PRED) & ~IS_USED);
+			if ($with_pred) {
+				traverse($grammar, $nterm, $node->start, $visit, $flag, true);
+			}
 		} else if ($node instanceof Epsilon) {
 		} else { /* Action */
 			$empty = false;
@@ -449,10 +456,17 @@ function test_unused_nterm($grammar) {
 		reset($grammar->nonterm);
 		$grammar->start = key($grammar->nonterm);
 	}
-	traverse_nt($grammar, $grammar->nonterm[$grammar->start], visit_number(), IS_USED);
+	traverse_nt($grammar, $grammar->nonterm[$grammar->start], visit_number(), IS_USED, false);
+
+	$visit = visit_number();
+	foreach($grammar->pred as $node) {
+		if ($node instanceof SyntaticPredicate) {
+			traverse($grammar, null, $node->start, $visit, IS_USED_IN_PRED, true);
+		}
+	}
 
 	if (isset($grammar->nonterm['SKIP'])) {
-		traverse_nt($grammar, $grammar->nonterm['SKIP'], visit_number(), IS_SKIPPED);
+		traverse_nt($grammar, $grammar->nonterm['SKIP'], visit_number(), IS_SKIPPED, false);
 	}
 
 	$ok = true;
@@ -2558,7 +2572,7 @@ function emit_scanner($f, $func, $dfa) {
 	$f->scanner_end($func);
 }
 
-function emit_la_dfa($f, $grammar, $start, $scanner) {
+function emit_la_dfa($f, $grammar, $start, $scanner, $in_pred=false) {
 	$f->save_pos();
 	$f->la_loop_start($start);
 	$dfa = $grammar->la_dfa[$start];
@@ -2589,7 +2603,7 @@ function emit_la_dfa($f, $grammar, $start, $scanner) {
 				$f->la_state_transition($start, $state, $target, $scanner->get_sym);
 			}
 		}
-		$f->la_state_else_error();
+		$f->la_state_else_error($in_pred);
 		$f->la_state_end();
 	}
 	// TODO: Proper scanner
@@ -2626,7 +2640,7 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 				$use_dfa = true;
 				if (!isset($grammar->la_dfa[$p->state]->emited)) {
 				    $grammar->la_dfa[$p->state]->emited = true;
-				    emit_la_dfa($f, $grammar, $p->state, $scanner);
+				    emit_la_dfa($f, $grammar, $p->state, $scanner, $in_pred);
 				}
 			} else {
 				$use_dfa = false;
@@ -2704,7 +2718,7 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 			if (isset($p->state) && isset($grammar->la_dfa[$p->state])) {
 				if (!isset($grammar->la_dfa[$p->state]->emited)) {
 				    $grammar->la_dfa[$p->state]->emited = true;
-				    emit_la_dfa($f, $grammar, $p->state, $scanner);
+				    emit_la_dfa($f, $grammar, $p->state, $scanner, $in_pred);
 				}
 				$f->parser_alt_if_condition($p->state, $p->start);
 			} else {
@@ -2720,7 +2734,7 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 					$f->parser_start_while();
 					if (!isset($grammar->la_dfa[$p->state]->emited)) {
 					    $grammar->la_dfa[$p->state]->emited = true;
-					    emit_la_dfa($f, $grammar, $p->state, $scanner);
+					    emit_la_dfa($f, $grammar, $p->state, $scanner, $in_pred);
 					}
 					$f->parser_alt_while_condition($p->state, $p->start);
 				} else {
@@ -2749,7 +2763,7 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 				if (isset($p->last) && isset($grammar->la_dfa[$state])) {
 					if (!isset($grammar->la_dfa[$state]->emited)) {
 					    $grammar->la_dfa[$state]->emited = true;
-					    emit_la_dfa($f, $grammar, $state, $scanner);
+					    emit_la_dfa($f, $grammar, $state, $scanner, $in_pred);
 					}
 					$f->parser_alt_until_condition($p->state, $p->start);
 				} else {
@@ -2817,13 +2831,18 @@ function emit_code($grammar) {
 	  			}
 			}
 		  	foreach ($grammar->nonterm as $name => $nt) {
-		  		if ($nt->flags & IS_USED_IN_PRED) {
+				if ($nt->flags & IS_USED_IN_PRED) {
 					$f->parser_forward_func("check_$name", false, null);
-		  		}
+				}
+			}
+			foreach ($grammar->nonterm as $name => $nt) {
 		  		if ($nt->flags & IS_USED) {
 					$f->parser_forward_func("parse_$name", false, IGNORE_ATTRIBUTES ? null : $nt->attrs);
 		  		}
 			}		
+			foreach ($grammar->pred as $pred) {
+				$f->parser_forward_synpred($pred->name);
+			}
 			$f->parser_forward_end();
 		}
 	}
@@ -2850,9 +2869,20 @@ function emit_code($grammar) {
 		  		}
 			}
 		}
+		if (isset($grammar->la_dfa) && is_array($grammar->la_dfa)) {
+			foreach ($grammar->la_dfa as &$dfa) {
+				unset($dfa->emited);
+			}
+		}
 	  	foreach ($grammar->pred as $pred) {
 	  		// TODO: scanner ???
-			$f->synpred($grammar, $pred, $scan);
+			if (!$pred->start instanceof NonTerminal ||
+			    $pred->start->next != null) {
+				$f->parser_synpred_start($pred);
+				emit_parser_code($f, $grammar, $pred->name, $pred->start, array(), $scan, 1);
+				$f->parser_synpred_end($pred);
+			}
+			$f->parser_synpred($pred);
 	  	}
 	  	foreach ($grammar->nonterm as $name => $nt) {
 	  		if ($nt->flags & IS_USED) {

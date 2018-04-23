@@ -121,6 +121,13 @@ function ast_to_dot($f, &$n, $p, $from, $to, $dump_mode, $style="", $color="") {
 				$from = $n;
 				$n++;
 			}
+		} else if ($p instanceof Predicate) {
+			if ($dump_mode == DOT_DUMP_AST) {
+				fwrite($f, "\tn$n [label=\"Predicate\",shape=diamond];\n");
+				fwrite($f, "\tn$from -> n$n$style;\n");
+				$from = $n;
+				$n++;
+			}
 		}
 		$p = $p->up ? null : $p->next;
 	}
