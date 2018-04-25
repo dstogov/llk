@@ -18,7 +18,7 @@ class CEmitter extends Emitter {
 		}
 		$this->write("\n");
 
-		$this->write("const char * sym_name[] = {\n");
+		$this->write("static const char * sym_name[] = {\n");
 		foreach ($grammar->term as $term) {
 			if ($term->special) {
 				$this->write("\t\"<$term->name>\",\n");
@@ -906,7 +906,7 @@ class CEmitter extends Emitter {
 		if ($check_only) {
 			$this->write("return -1;\n");
 		} else {
-			$this->write("yy_error_sym(\"unexpected '%s'\", sym2);\n");
+			$this->write("yy_error_sym(\"unexpected\", sym2);\n");
 		}
 		$this->indent();
 		$this->write("}\n");
@@ -986,9 +986,9 @@ class CEmitter extends Emitter {
 			$this->write("return -1;\n");
 		} else {
 			if ($this->grammar->term[$sym]->special) {
-				$this->write("yy_error_sym(\"<" . $this->grammar->term[$sym]->name . "> expected, got '%s'\", sym);\n");
+				$this->write("yy_error_sym(\"<" . $this->grammar->term[$sym]->name . "> expected, got\", sym);\n");
 			} else {
-				$this->write("yy_error_sym(\"'$sym' expected, got '%s'\", sym);\n");
+				$this->write("yy_error_sym(\"'$sym' expected, got\", sym);\n");
 			}
 		}
 		$this->indent();
@@ -1166,7 +1166,7 @@ class CEmitter extends Emitter {
 		if ($check_only) {
 			$this->write("return -1;\n");
 		} else {
-			$this->write("yy_error_sym(\"unexpected '%s'\", sym);\n");
+			$this->write("yy_error_sym(\"unexpected\", sym);\n");
 		}
 		$this->indent();
 		$this->write("}\n");
@@ -1179,7 +1179,7 @@ class CEmitter extends Emitter {
 		if ($check_only) {
 			$this->write("return -1;\n");
 		} else {
-			$this->write("yy_error_sym(\"unexpected '%s'\", sym);\n");
+			$this->write("yy_error_sym(\"unexpected\", sym);\n");
 		}
 		$this->dec_indent();
 		$this->indent();
@@ -1213,7 +1213,7 @@ class CEmitter extends Emitter {
 		}
 		$this->write("\tsym = parse_$start_sym(get_sym()" . $this->gen_attrs($attrs, false) . ");\n");
 		$this->write("\tif (sym != YY_EOF) {\n");
-		$this->write("\t\tyy_error_sym(\"<EOF> expected, got '%s'\", sym);\n");
+		$this->write("\t\tyy_error_sym(\"<EOF> expected, got\", sym);\n");
 		$this->write("\t}\n");
 		$this->write("}\n\n");
 	}
