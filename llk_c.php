@@ -584,15 +584,15 @@ class CEmitter extends Emitter {
 		$this->indent();
 		$this->write("if (YYPOS >= YYEND) {\n");
 		$this->indent(1);
-		$this->write("yy_error(\"Unexpected <EOF>\");\n");
+		$this->write("yy_error(\"unexpected <EOF>\");\n");
 		$this->indent();
 		$this->write("} else if (YYPOS == yy_text) {\n");
 		$this->indent(1);
-		$this->write("yy_error(\"Unexpected character 'escape_char(ch)'\");\n");
+		$this->write("yy_error(\"unexpected character 'escape_char(ch)'\");\n");
 		$this->indent();
 		$this->write("} else {\n");
 		$this->indent(1);
-		$this->write("yy_error(\"Unexpected sequence 'escape_string(yy_text, 1 + YYPOS - yy_text))'\");\n");
+		$this->write("yy_error(\"unexpected sequence 'escape_string(yy_text, 1 + YYPOS - yy_text))'\");\n");
 		$this->indent();
 		$this->write("}\n");
 		$this->indent();
