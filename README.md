@@ -1,8 +1,8 @@
-# Recursive-descent parsers and scanners generaror
+# Recursive-descent parser and scanner generator
 
 This is an experimental programming language front-end generator. Its implementation
-is mainly based on ideas taken from Coco/R [http://www.ssw.uni-linz.ac.at/Research/Projects/Coco/]
-and ANTLR [https://www.antlr.org/]. It generates light-weight efficient scanners
+is mainly based on ideas taken from [Coco/R](http://www.ssw.uni-linz.ac.at/Research/Projects/Coco/)
+and [ANTLR](https://www.antlr.org/). It generates light-weight efficient scanners
 and recursive-descent parsers, using LL(*) and syntatic and semantic predicates
 for LL conflicts resolution.
 
