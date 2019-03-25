@@ -998,10 +998,8 @@ function get_sym() {
 			$sym = skip_WS($sym);
 		} else if ($sym == YY_ONE_LINE_COMMENT) {
 			$sym = skip_ONE_LINE_COMMENT($sym);
-		} else if ($sym == YY_COMMENT) {
-			$sym = skip_COMMENT($sym);
 		} else {
-			error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
+			$sym = skip_COMMENT($sym);
 		}
 	}
 	return $sym;
@@ -1759,23 +1757,19 @@ function parse_alternative($sym, $grammar, &$gl, &$gr) {
 					$grammar->pred[$gl->name] = $gl;
 				}
 				$first = false;
-		} else if ($sym == YY__QUERY) {
+		} else {
 			$sym = get_sym();
 			$sym = parse_action($sym, $code);
 			$gl = $gr = new SemanticPredicate($code);
 				$first = false;
-		} else {
-			error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 		}
 	}
 	while (in_array($sym, array(YY_STRING,YY_IDENT,YY_IDENT_PLUS,YY__LPAREN,YY__LBRACE))) {
 		if ($sym == YY_STRING || $sym == YY_IDENT || $sym == YY_IDENT_PLUS || $sym == YY__LPAREN) {
 			$sym = parse_term($sym, $grammar, $gl2, $gr2);
-		} else if ($sym == YY__LBRACE) {
+		} else {
 			$sym = parse_action($sym, $code);
 			$gl2 = $gr2 = new Action($code);
-		} else {
-			error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 		}
 		if ($first) {
 					$gl = $gl2; $gr = $gr2; $first = false;
@@ -1825,12 +1819,10 @@ function parse_term($sym, $grammar, &$gl, &$gr) {
 				$sym = get_sym();
 				make_iter(0, $gl, $gr, true);
 				break;
-			case YY__STAR_QUERY:
+			default:
 				$sym = get_sym();
 				make_iter(0, $gl, $gr, false);
 				break;
-			default:
-				error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 		}
 	}
 	return $sym;
@@ -1902,15 +1894,13 @@ function parse_action_code($sym, &$code) {
 		if ($sym == YY_ACTION_CHAR) {
 			$sym = parse_action_char($sym, $ch);
 			$code .= $ch;
-		} else if ($sym == YY__LBRACE) {
+		} else {
 			$sym = parse_action_code($sym, $s);
 			if ($sym != YY__RBRACE) {
 				error("'}' expected, got '{$GLOBALS['sym_name'][$sym]}'");
 			}
 			$sym = action_code_get_sym();
 			$code .= "{" . $s . "}";
-		} else {
-			error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 		}
 	}
 	return $sym;
@@ -2036,12 +2026,10 @@ function parse_regex_term($sym, &$gl, &$gr) {
 				$sym = regexp2_get_sym();
 				make_iter(0, $gl, $gr, true);
 				break;
-			case YY__STAR_QUERY:
+			default:
 				$sym = regexp2_get_sym();
 				make_iter(0, $gl, $gr, false);
 				break;
-			default:
-				error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 		}
 	}
 	return $sym;

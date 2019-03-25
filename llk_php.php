@@ -1075,6 +1075,12 @@ class PhpEmitter extends Emitter {
 		$this->dec_indent();
 	}
 
+	function parser_default_case() {
+		$this->indent();
+		$this->write("default:\n");
+		$this->inc_indent();
+	}
+
 	function parser_unexpected($check_only) {
 		$this->dec_indent();
 		$this->indent();

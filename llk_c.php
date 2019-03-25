@@ -1142,6 +1142,12 @@ class CEmitter extends Emitter {
 		$this->inc_indent();
 	}
 
+	function parser_default_case() {
+		$this->indent();
+		$this->write("default:\n");
+		$this->inc_indent();
+	}
+
 	function parser_start_alt_case($state, $p) {
 		$set = array();
 		$this->collect_states($state, $p, $set);

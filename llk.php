@@ -2678,11 +2678,22 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 					$f->parser_switch();
 				}
 			}
+			$everything_checked = false;
+			$set = comp_first_set($grammar, $p);
+			if ($set === $checked) {
+				$everything_checked = true;
+			}
 			$q = $p;
 			while ($q != null) {
 				if (!($q->start instanceof Predicate)) {
 					$set = comp_expected($grammar, $q->start, $nt);
-					if ($use_dfa) {
+					if ($q->alt == null && $everything_checked) {
+						if ($use_switch) {
+							$f->parser_default_case();
+						} else {
+							$f->parser_else();
+						}
+					} else if ($use_dfa) {
 						if ($use_switch) {
 							$f->parser_start_alt_case($p->state, $q->start);
 						} else {
@@ -2704,7 +2715,9 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 				}
 				$q = $q->alt;
 			}
-			if ($use_switch) {
+			if ($everything_checked) {
+				$f->parser_end_if();
+			} else if ($use_switch) {
 				$f->parser_unexpected_case($in_pred);
 				if ($p->has_pred) {
 //???					$f->dec_indent($indent);
