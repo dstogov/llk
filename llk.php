@@ -2646,9 +2646,13 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 				$use_dfa = false;
 			}
 			// calculate number of alternatives
+			$terminals_only = true;
 			$n = 0;
 			$q = $p;
 			while ($q != null) {
+				if (!($q->start instanceof Terminal) || (!$q->start->up && $q->start->next != null)) {
+					$terminals_only = false;
+				}
 				$n++;
 				$q = $q->alt;
 			}
@@ -2681,6 +2685,18 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 			$everything_checked = false;
 			$set = comp_first_set($grammar, $p);
 			if ($set === $checked) {
+				if ($terminals_only) {
+					// FIXME: select proper sub-scanner more careful
+					if ($grammar->nonterm[$nt]->lexer !== null) {
+						$scan = $grammar->nonterm[$nt]->lexer;
+					} else {
+						$scan = $scanner;
+					}
+					$f->parser_get_sym(
+						isset($scanner->skip[$nt]) ? $scan->func : $scan->get_sym);
+					$p = $p->up ? null : $p->next;
+					continue;
+				}
 				$everything_checked = true;
 			}
 			$q = $p;
