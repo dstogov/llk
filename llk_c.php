@@ -1164,6 +1164,22 @@ class CEmitter extends Emitter {
 		$this->dec_indent();
 	}
 
+	function parser_alt_exit_condition($start) {
+		$this->dec_indent();
+		$this->indent();
+		$this->write("} else if (alt$start == -1) {\n");
+		$this->inc_indent();
+		$this->indent();
+		$this->write("return sym;\n");
+	}
+
+	function parser_alt_exit_case() {
+		$this->indent();
+		$this->write("case -1:\n");
+		$this->indent(1);
+		$this->write("return sym;\n");
+	}
+
 	function parser_unexpected($check_only) {
 		$this->dec_indent();
 		$this->indent();

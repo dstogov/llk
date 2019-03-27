@@ -2743,12 +2743,18 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 			if ($everything_checked) {
 				$f->parser_end_if();
 			} else if ($use_switch) {
+				if ($use_dfa && in_array(-1, $grammar->la_dfa[$p->state]->final)) {
+					$f->parser_alt_exit_case();
+				}
 				$f->parser_unexpected_case($in_pred);
 				if ($p->has_pred) {
 //???					$f->dec_indent($indent);
 					$f->parser_end_if();
 				}
 			} else {
+				if ($use_dfa && in_array(-1, $grammar->la_dfa[$p->state]->final)) {
+					$f->parser_alt_exit_condition($p->state);
+				}
 				$f->parser_unexpected($in_pred);
 			}
 		} else if ($p instanceof Option) {
