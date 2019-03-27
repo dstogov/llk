@@ -1445,6 +1445,15 @@ function nterm_nfa($grammar, $nterm) {
 			$start->next = new Terminal('<EOF>');
 			$grammar->nonterm['.start'] = new NonTermDef('.start', null, null, $start);
 			$grammar->nonterm[$grammar->start]->occurance[] = array('.start', $start);
+			// Add fictive .sub_start<N> nonterminals defined as sub-start followed by EOF
+			$n = 0;
+			foreach ($grammar->sub_start as $sub_start) {
+				$start = new NonTerminal($sub_start);
+				$start->next = new Terminal('<EOF>');
+				$name = ".sub_start".++$n;
+				$grammar->nonterm[$name] = new NonTermDef($name, null, null, $start);
+				$grammar->nonterm[$sub_start]->occurance[] = array($name, $start);
+			}
 		}
 		$init = $grammar->la_nfa->n;
 		$nfa = new FA();
