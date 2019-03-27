@@ -1257,11 +1257,8 @@ function build_la_dfa($grammar, $start_stataes, $terms, $ctx_nt, &$ambiguous) {
 		list($nt, $node) = $occurance;
 		nterm_nfa($grammar, $nt);
 		$ctx[] = $node->state;
-//		$alt[$node->state] = $stack;
-//		x_closure($grammar, $node->state, $stack, $alt, $checked);
 	}
-//	$initial_stack = (count($ctx) == 0) ? array() : array($ctx);
-	 
+
 	$alts = array();
 	foreach ($start_stataes as $start => $dummy) {
 		if (isset($grammar->la_nfa->move[$start])) {
@@ -1417,7 +1414,12 @@ function calc_follow2($p, $state, &$first, &$last, &$nullable, $nfa) {
 		}
 	}
 	if ($p->next !== null && !$p->up) {
-		$state = isset($p->state) ? $p->state : $state;
+		// TODO: Alternative and Option are not merged with the following control structure ???
+		if ($p instanceof Alternative || $p instanceof Option/* || $p instanceof Iteration*/) {
+			$state = $nfa->n;
+		} else {
+			$state = $p->state;
+		}
 		calc_follow2($p->next, $state, $sub_first, $sub_last, $sub_nullable, $nfa);
 		foreach ($last as $f => $x) {
 			foreach ($sub_first as $l => $y) {

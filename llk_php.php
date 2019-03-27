@@ -678,10 +678,7 @@ class PhpEmitter extends Emitter {
 			$p = $p->next;
 		}
 		while ($p != null) {
-			if ($p->state != $state) {
-				$set[$p->state] = 1;
-				return;
-			} else if ($p instanceof Alternative) {
+			if ($p instanceof Alternative) {
 				$q = $p;
 				do {
 					$this->collect_states($state, $q->start, $set);
@@ -691,6 +688,9 @@ class PhpEmitter extends Emitter {
 				$this->collect_states($state, $p->start, $set);
 			} else if ($p instanceof Iteration) {
 				$this->collect_states($state, $p->start, $set);
+			} else if ($p->state != $state) {
+				$set[$p->state] = 1;
+				return;
 			}
 			$p = $p->up ? null : $p->next;
 		}
