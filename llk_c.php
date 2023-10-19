@@ -1225,6 +1225,38 @@ class CEmitter extends Emitter {
 	  	return $s;
 	}
 
+	function extract_attr_name($attr) {
+		$l = strlen($attr);
+		if ($l == 0) {
+			return $attr;
+		}
+		$i = $l;
+		while ($i > 0) {
+			$c = $attr[$i-1];
+			if (!($c >= 'a' && $c <= 'z')
+			 && !($c >= 'A' && $c <= 'Z')
+			 && !($c >= '0' && $c <= '9')
+			 && $c != '_') {
+				break;
+			}
+			$i--;
+		}
+		if ($i == $l) {
+			return $attr;
+		}
+		return substr($attr, $i);
+	}
+
+	function gen_main_attrs($attrs) {
+		$s = "";
+		if (!empty($attrs)) {
+			foreach ($attrs as $attr) {
+				$s .= ", " . $this->extract_attr_name($attr);
+			}
+		}
+		return $s;
+	}
+
 	function main($func_name, $start_sym, $attrs) {
 		$this->write("static void $func_name(" . $this->gen_attrs($attrs, true) . ") {\n");
 		$this->write("\tint sym;\n");
@@ -1233,7 +1265,7 @@ class CEmitter extends Emitter {
 		if ($this->lineno) {
 			$this->write("\tyy_line = 1;\n");
 		}
-		$this->write("\tsym = parse_$start_sym(get_sym()" . $this->gen_attrs($attrs, false) . ");\n");
+		$this->write("\tsym = parse_$start_sym(get_sym()" . $this->gen_main_attrs($attrs) . ");\n");
 		$this->write("\tif (sym != YY_EOF) {\n");
 		$this->write("\t\tyy_error_sym(\"<EOF> expected, got\", sym);\n");
 		$this->write("\t}\n");
