@@ -38,7 +38,7 @@ function run_test($test, $name, $code, $expect, $opt) {
 	if (!@file_put_contents($gramma, $code)) {
 		return false;
 	}
-	if (@system("php llk.php $opt $gramma > $output") != 0) {
+	if (@system("php llk.php $opt $gramma > $output") === false) {
 		return false;
 	}
 	$out = @file_get_contents($output);

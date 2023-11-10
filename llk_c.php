@@ -45,50 +45,67 @@ class CEmitter extends Emitter {
 			$this->write("\n");
 		}
 
-/*
-		$this->write("function escape_char(\$c) {\n");
-		$this->write("\tif (\$c === C_EOF) {\n");
-		$this->write("\t\treturn \"<EOF>\";\n");
-		$this->write("\t} else if (ord(\$c) == ord('\'')) {\n");
-		$this->write("\t\treturn \"\\'\";\n");
-		$this->write("\t} else if (ord(\$c) == ord('\\\\')) {\n");
-		$this->write("\t\treturn \"\\\\\";\n");
-		$this->write("\t} else if (ord(\$c) == ord(\"\\r\")) {\n");
-		$this->write("\t\treturn \"\\\\r\";\n");
-		$this->write("\t} else if (ord(\$c) == ord(\"\\n\")) {\n");
-		$this->write("\t\treturn \"\\\\n\";\n");
-		$this->write("\t} else if (ord(\$c) == ord(\"\\t\")) {\n");
-		$this->write("\t\treturn \"\\\\t\";\n");
-		$this->write("\t} else if (ord(\$c) == ord(\"\\v\")) {\n");
-		$this->write("\t\treturn \"\\\\v\";\n");
-		$this->write("\t} else if (ord(\$c) == ord(\"\\f\")) {\n");
-		$this->write("\t\treturn \"\\\\f\";\n");
-		$this->write("\t} else if (ord(\$c) < ord(' ') || ord(\$c) >= 127) {\n");
-		$this->write("\t\t\$c = ord(\$c);\n");
-		$this->write("\t\treturn \"\\\\\" . chr(ord('0') + ((\$c >> 6) % 8)) .\n");
-		$this->write("\t\t\tchr(ord('0') + ((\$c >> 3) % 8)) .\n");
-		$this->write("\t\t\tchr(ord('0') + (\$c % 8));\n");
-		$this->write("\t} else {\n");
-		$this->write("\t\treturn \$c;\n");
-		$this->write("\t}\n");
-		$this->write("}\n");
-		$this->write("\n");
-		$this->write("function escape_string(\$s) {\n");
-		$this->write("\t\$n = strlen(\$s);\n");
-		$this->write("\t\$r = \"\";\n");
-		$this->write("\tfor (\$i = 0; \$i < \$n; \$i++) {\n");
-		$this->write("\t\t\$r .= escape_char(\$s[\$i]);\n");
-		$this->write("\t}\n");
-		$this->write("\treturn \$r;\n");
-		$this->write("}\n");
-		$this->write("\n");
-		$this->write("function get_text(\$f = 0, \$l = 0) {\n");
-		$this->write("\tglobal \$buf, \$text, \$pos;\n");
-		$this->write("\t\$text_len = \$pos - \$text;\n");
-		$this->write("\treturn (\$text_len - \$f - \$l > 0) ? substr(\$buf, \$text + \$f, \$text_len - \$f - \$l) : null;\n");
-		$this->write("}\n");
-		$this->write("\n");
-*/
+		$this->write(<<<'EOF'
+size_t yy_escape(char *buf, unsigned char ch)
+{
+	switch (ch) {
+		case '\\': buf[0] = '\\'; buf[1] = '\\'; return 2;
+		case '\'': buf[0] = '\\'; buf[1] = '\''; return 2;
+		case '\"': buf[0] = '\\'; buf[1] = '\"'; return 2;
+		case '\a': buf[0] = '\\'; buf[1] = '\a'; return 2;
+		case '\b': buf[0] = '\\'; buf[1] = '\b'; return 2;
+		case '\e': buf[0] = '\\'; buf[1] = '\e'; return 2;
+		case '\f': buf[0] = '\\'; buf[1] = '\f'; return 2;
+		case '\n': buf[0] = '\\'; buf[1] = '\n'; return 2;
+		case '\r': buf[0] = '\\'; buf[1] = '\r'; return 2;
+		case '\t': buf[0] = '\\'; buf[1] = '\t'; return 2;
+		case '\v': buf[0] = '\\'; buf[1] = '\v'; return 2;
+		case '\?': buf[0] = '\\'; buf[1] = 0x3f; return 2;
+		default: break;
+	}
+	if (ch < 32 || ch >= 127) {
+		buf[0] = '\\';
+		buf[1] = '0' + ((ch >> 3) % 8);
+		buf[2] = '0' + ((ch >> 6) % 8);
+		buf[3] = '0' + (ch % 8);
+		return 4;
+	} else {
+		buf[0] = ch;
+		return 1;
+	}
+}
+
+const char *yy_escape_char(char *buf, unsigned char ch)
+{
+	size_t len = yy_escape(buf, ch);
+	buf[len] = 0;
+	return buf;
+}
+
+const char *yy_escape_string(char *buf, size_t size, const unsigned char *str, size_t n)
+{
+	size_t i = 0;
+	size_t pos = 0;
+	size_t len;
+
+	while (i < n) {
+		if (pos + 8 > size) {
+			buf[pos++] = '.';
+			buf[pos++] = '.';
+			buf[pos++] = '.';
+			break;
+		}
+		len = yy_escape(buf + pos, str[i]);
+		i++;
+		pos += len;
+	}
+	buf[pos] = 0;
+	return buf;
+}
+
+
+EOF
+);
 	}
 
 	function gen_escape_char($c) {
@@ -248,6 +265,8 @@ class CEmitter extends Emitter {
 		$this->indent();
 		$this->write("static int $func(void) {\n");
 		$this->inc_indent();
+		$this->indent();
+		$this->write("char buf[64];\n");
 		$this->indent();
 		$this->write("int ch;\n");
 		if (self::COMBINE_FINAL || $need_ret) {
@@ -588,11 +607,11 @@ class CEmitter extends Emitter {
 		$this->indent();
 		$this->write("} else if (YYPOS == yy_text) {\n");
 		$this->indent(1);
-		$this->write("yy_error(\"unexpected character 'escape_char(ch)'\");\n");
+		$this->write("yy_error_str(\"unexpected character\",  yy_escape_char(buf, ch));\n");
 		$this->indent();
 		$this->write("} else {\n");
 		$this->indent(1);
-		$this->write("yy_error(\"unexpected sequence 'escape_string(yy_text, 1 + YYPOS - yy_text))'\");\n");
+		$this->write("yy_error_str(\"unexpected sequence\", yy_escape_string(buf, sizeof(buf), yy_text, 1 + YYPOS - yy_text));\n");
 		$this->indent();
 		$this->write("}\n");
 		$this->indent();
