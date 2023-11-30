@@ -2434,6 +2434,7 @@ function emit_scanner($f, $func, $dfa) {
 
 	$tunnel = array();
 	$tunnel_to = array();
+	$pin = array();
 	if (SCANNER_TUNNELS) {
 		foreach ($dfa->move as $s1 => $v) {
 			if (count($v) > 1) {
@@ -2552,7 +2553,7 @@ function emit_scanner($f, $func, $dfa) {
 							$dfa->move[$s2] = $dfa->move[$target];
 							$dfa->final[$s2] = false;
 							$tunnel_to[$target] = $s2;
-							$tunnel_to[$s2] = true;
+							$pin[$s2] = true;
 							if (SCANNER_INLINE) {
 								$states[$s2] = 0;
 							}
@@ -2572,7 +2573,7 @@ function emit_scanner($f, $func, $dfa) {
 	$f->scanner_start($func, $need_ret, count($bt) > 0, count($dfa->ctx) > 0);
 	$f->scanner_loop_start();
 	foreach ($dfa->move as $s1 => $v) {
-		if ($s1 == 0 || !SCANNER_INLINE || $states[$s1] > 1 || isset($tunnel_to[$s1])) {
+		if ($s1 == 0 || !SCANNER_INLINE || $states[$s1] > 1 || isset($tunnel_to[$s1]) || isset($pin[$s1])) {
 			$f->scanner_state_start($s1, $s1 == 0 || (count($v) == 0 && isset($tunnel[$s1]) && isset($dfa->final[$s1])), !SCANNER_INLINE || isset($states[$s1]), isset($tunnel_to[$s1]), isset($bt[$s1]) ? $bt[$s1] : null);
 			emit_scanner_state($f, $dfa, $s1, $v, $states, $tunnel, $bt);
 			$f->scanner_state_end();
