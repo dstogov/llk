@@ -65,8 +65,8 @@ size_t yy_escape(char *buf, unsigned char ch)
 	}
 	if (ch < 32 || ch >= 127) {
 		buf[0] = '\\';
-		buf[1] = '0' + ((ch >> 3) % 8);
-		buf[2] = '0' + ((ch >> 6) % 8);
+		buf[1] = '0' + ((ch >> 6) % 8);
+		buf[2] = '0' + ((ch >> 3) % 8);
 		buf[3] = '0' + (ch % 8);
 		return 4;
 	} else {
