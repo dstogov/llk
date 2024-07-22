@@ -2570,6 +2570,13 @@ function emit_scanner($f, $func, $dfa) {
 
 	$bt = scanner_check_backtracking($dfa, $tunnel);
 
+	$tunnel_to = [];
+	foreach ($tunnel as $from => $to) {
+		if (count($dfa->move[$from]) > 0) {
+			$tunnel_to[$to] = true;
+		}
+	}
+
 	$f->scanner_start($func, $need_ret, count($bt) > 0, count($dfa->ctx) > 0);
 	$f->scanner_loop_start();
 	foreach ($dfa->move as $s1 => $v) {
