@@ -341,7 +341,7 @@ EOF
 			$this->indent();
 			$this->write("accept = " . $this->grammar->term[$sym]->const_name . ";\n");
 			$this->indent();
-			$this->write("accept_pos = yy_pos;\n");
+			$this->write("accept_pos = YYPOS;\n");
 		}
 	}
 
@@ -449,7 +449,7 @@ EOF
 				$this->indent();
 				$this->write("accept = " . $this->grammar->term[$sym]->const_name . ";\n");
 				$this->indent();
-				$this->write("accept_pos = yy_pos;\n");
+				$this->write("accept_pos = YYPOS;\n");
 			}
 		}
 	}
