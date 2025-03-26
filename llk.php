@@ -1712,6 +1712,7 @@ function build_alt_dfa($nfa) {
 	}
 
 	$dfa = new FA;
+	$dfa->ctx = array();
 	$n = 1;
 	$dstates[0] = $nfa->move[$nfa->start];
 
