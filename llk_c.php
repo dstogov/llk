@@ -475,7 +475,7 @@ EOF
 		}
 	}
 
-	function scanner_state_accept($sym, $ctx) {
+	function scanner_state_accept($sym, $ctx, $skip = false) {
 		if ($ctx) {
 			$this->indent();
 			$this->write("YYPOS -= ctx;\n");
@@ -483,7 +483,10 @@ EOF
 			$this->indent();
 			$this->write("YYPOS++;\n");
 		}
-		if (self::COMBINE_FINAL) {
+		if ($skip) {
+			$this->indent();
+			$this->write("goto _yy_state_start;\n");
+		} else if (self::COMBINE_FINAL) {
 			$this->indent();
 			$this->write("ret = " . $this->grammar->term[$sym]->const_name . ";\n");
 			$this->indent();
@@ -496,14 +499,17 @@ EOF
 		}
 	}
 
-	function scanner_state_else_accept($sym, $use_switch) {
+	function scanner_state_else_accept($sym, $use_switch, $skip = false) {
 		$this->indent();
 		if ($use_switch) {
 			$this->write("default:\n");
 		} else {
 			$this->write("} else {\n");
 		}
-		if (self::COMBINE_FINAL) {
+		if ($skip) {
+			$this->indent(1);
+			$this->write("goto _yy_state_start;\n");
+		} else if (self::COMBINE_FINAL) {
 			if ($sym !== null) {
 				$this->indent(1);
 				$this->write("ret = " . $this->grammar->term[$sym]->const_name . ";\n");
