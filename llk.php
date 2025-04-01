@@ -71,13 +71,11 @@ class LexerDef {
 	public $func;
 	public $get_sym;
 	public $skip; /* Set */
-	public $scan_skip; /* Set */
 	public $dfa;
-	function __construct($func, $get_sym, $skip = null, $scan_skip = false) {
+	function __construct($func, $get_sym, $skip = null) {
 		$this->func = $func;
 		$this->get_sym = $get_sym;
 		$this->skip = $skip;
-		$this->scan_skip = $scan_skip;
 	}
 }
 
@@ -493,10 +491,10 @@ function test_unused_nterm($grammar) {
 		}
 	}
 
-	if (count($skip) > 0 && SCAN_SKIP_SYMS) {
-		$grammar->nonterm[$grammar->start]->lexer = new LexerDef("get_skip_sym", "get_sym", $skip, true);
+	if (count($skip) > 0) {
+		$grammar->nonterm[$grammar->start]->lexer = new LexerDef("get_skip_sym", "get_sym", $skip);
 	} else {
-		$grammar->nonterm[$grammar->start]->lexer = new LexerDef("get_sym", "get_sym", $skip, false);
+		$grammar->nonterm[$grammar->start]->lexer = new LexerDef("get_sym", "get_sym");
 	}
 
 	return $ok;
@@ -2284,9 +2282,6 @@ function build_nfa($grammar, $nterm, $scan) {
 	if ($scan->skip != null) {
 		foreach ($scan->skip as $name => $node) {
 			$grammar->nonterm[$name]->use_lexer = $scan;
-			if (!$scan->scan_skip) {
-				$grammar->nonterm[$name]->ast->skip = true;
-			}
 			collect_terms($grammar, $grammar->nonterm[$name]->ast, $n, $scan, $term);
 		}
 	}
@@ -2374,8 +2369,7 @@ function emit_scanner_state($f, $dfa, $s1, $v, $states, $tunnel, $bt) {
 				}
 			} else {
 				if (isset($dfa->final[$s2])) {
-					$f->scanner_state_accept($dfa->final[$s2]->name, isset($dfa->ctx[$s2]),
-						isset($dfa->final[$s2]->skip) && $dfa->final[$s2]->skip);
+					$f->scanner_state_accept($dfa->final[$s2]->name, isset($dfa->ctx[$s2]));
 				} else {
 					error("???");
 				}
@@ -2399,8 +2393,7 @@ function emit_scanner_state($f, $dfa, $s1, $v, $states, $tunnel, $bt) {
 				}
 			} else {
 				if (isset($dfa->final[$s2])) {
-					$f->scanner_state_accept($dfa->final[$s2]->name, isset($dfa->ctx[$s2]),
-							isset($dfa->final[$s2]->skip) && $dfa->final[$s2]->skip);
+					$f->scanner_state_accept($dfa->final[$s2]->name, isset($dfa->ctx[$s2]));
 				} else {
 					error("???");
 				}
@@ -2417,8 +2410,7 @@ function emit_scanner_state($f, $dfa, $s1, $v, $states, $tunnel, $bt) {
 			if ($dfa->final[$s1] === false) {
 				$f->scanner_state_else_accept(null, $use_switch);
 			} else {
-				$f->scanner_state_else_accept($dfa->final[$s1]->name, $use_switch,
-					isset($dfa->final[$s1]->skip) && $dfa->final[$s1]->skip);
+				$f->scanner_state_else_accept($dfa->final[$s1]->name, $use_switch);
 			}
 		} else {
 			$f->scanner_state_else_error($dfa->n, $use_switch);
@@ -2883,7 +2875,7 @@ function emit_code($grammar) {
 		if ($f::NEED_FORWARDS) {
 			$f->parser_forward_start();
 			foreach ($grammar->scanners as $scan) {
-				if ($scan->scan_skip) {
+		  		if ($scan->skip !== null) {
 		  			foreach ($scan->skip as $name => $nt) {
 			  			if ($name === "SKIP") {
 		  					$f->parser_forward_func("get_sym", true, null);
@@ -2912,7 +2904,7 @@ function emit_code($grammar) {
   	if (!EMIT_PARSER_ONLY) {
 		foreach ($grammar->scanners as $scan) {
 			emit_scanner($f, $scan->func, $scan->dfa);
-			if ($scan->scan_skip) {
+	  		if ($scan->skip !== null) {
 	  			foreach ($scan->skip as $name => $nt) {
 		  			if ($name === "SKIP") {
 		  				emit_parser_func($f, $grammar, "get_sym", $grammar->nonterm[$name], $scan, true);
@@ -3052,8 +3044,6 @@ for ($i = 1; $i < $argc; $i++) {
 			define("IGNORE_ACTIONS", true);
 		} else if ($argv[$i] == "--ignore-attributes") {
 			define("IGNORE_ATTRIBUTES", true);
-		} else if ($argv[$i] == "--scan-skip-syms") {
-			define("SCAN_SKIP_SYMS", true);
 		} else if ($argv[$i] == "-t") {
 			define("PROFILE", true);
 		} else if ($argv[$i] == "-c") {
@@ -3135,9 +3125,6 @@ if (!defined("IGNORE_ACTIONS")) {
 }
 if (!defined("IGNORE_ATTRIBUTES")) {
 	define("IGNORE_ATTRIBUTES", false);
-}
-if (!defined("SCAN_SKIP_SYMS")) {
-	define("SCAN_SKIP_SYMS", false);
 }
 if (!defined("VERBOSE")) {
 	define("VERBOSE", false);

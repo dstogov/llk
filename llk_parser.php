@@ -155,7 +155,7 @@ function get_text($f = 0, $l = 0) {
 	return ($text_len - $f - $l > 0) ? substr($buf, $text + $f, $text_len - $f - $l) : null;
 }
 
-function get_sym() {
+function get_skip_sym() {
 	global $buf, $pos, $len, $text;
 	global $line;
 
@@ -770,21 +770,15 @@ function get_sym() {
 						if ($ch === "\n") {
 							$line++;
 							$pos++;
-							$text = $pos;
-							$state = 0;
-							break;
+							return YY_EOL;
 						} else {
-							$text = $pos;
-							$state = 0;
-							break;
+							return YY_EOL;
 						}
 						break;
 					case "\n":
 						$line++;
 						$pos++;
-						$text = $pos;
-						$state = 0;
-						break;
+						return YY_EOL;
 						break;
 					case " ":
 					case "\t":
@@ -866,9 +860,7 @@ function get_sym() {
 				if ($ch === "\t" || $ch === "\v" || $ch === "\f" || $ch === " ") {
 					$pos++;
 				} else {
-					$text = $pos;
-					$state = 0;
-					break;
+					return YY_WS;
 				}
 				break;
 			case 32:
@@ -904,20 +896,14 @@ function get_sym() {
 					if ($ch === "\n") {
 						$line++;
 						$pos++;
-						$text = $pos;
-						$state = 0;
-						break;
+						return YY_ONE_LINE_COMMENT;
 					} else {
-						$text = $pos;
-						$state = 0;
-						break;
+						return YY_ONE_LINE_COMMENT;
 					}
 				} else if ($ch === "\n") {
 					$line++;
 					$pos++;
-					$text = $pos;
-					$state = 0;
-					break;
+					return YY_ONE_LINE_COMMENT;
 				} else if ($pos < $len && ($ch <= "\t" || $ch === "\v" || $ch === "\f" || $ch >= "\016")) {
 					$pos++;
 				} else {
@@ -930,9 +916,7 @@ function get_sym() {
 					$ch = $buf[$pos];
 					if ($ch !== "/") {$state = 51; break;}
 					$pos++;
-					$text = $pos;
-					$state = 0;
-					break;
+					return YY_COMMENT;
 				} else if ($pos < $len && ($ch <= ")" || $ch >= "+")) {
 					if ($ch === "\n") {
 						$line++;
@@ -971,6 +955,54 @@ function get_sym() {
 				break;
 		}
 	}
+}
+
+function skip_EOL($sym) {
+	if ($sym != YY_EOL) {
+		error("<EOL> expected, got '{$GLOBALS['sym_name'][$sym]}'");
+	}
+	$sym = get_skip_sym();
+	return $sym;
+}
+
+function skip_WS($sym) {
+	if ($sym != YY_WS) {
+		error("<WS> expected, got '{$GLOBALS['sym_name'][$sym]}'");
+	}
+	$sym = get_skip_sym();
+	return $sym;
+}
+
+function skip_ONE_LINE_COMMENT($sym) {
+	if ($sym != YY_ONE_LINE_COMMENT) {
+		error("<ONE_LINE_COMMENT> expected, got '{$GLOBALS['sym_name'][$sym]}'");
+	}
+	$sym = get_skip_sym();
+	return $sym;
+}
+
+function skip_COMMENT($sym) {
+	if ($sym != YY_COMMENT) {
+		error("<COMMENT> expected, got '{$GLOBALS['sym_name'][$sym]}'");
+	}
+	$sym = get_skip_sym();
+	return $sym;
+}
+
+function get_sym() {
+	$sym = get_skip_sym();
+	while ($sym == YY_EOL || $sym == YY_WS || $sym == YY_ONE_LINE_COMMENT || $sym == YY_COMMENT) {
+		if ($sym == YY_EOL) {
+			$sym = skip_EOL($sym);
+		} else if ($sym == YY_WS) {
+			$sym = skip_WS($sym);
+		} else if ($sym == YY_ONE_LINE_COMMENT) {
+			$sym = skip_ONE_LINE_COMMENT($sym);
+		} else {
+			$sym = skip_COMMENT($sym);
+		}
+	}
+	return $sym;
 }
 
 function ident_with_attrs_get_sym() {
