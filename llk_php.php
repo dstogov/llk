@@ -438,7 +438,7 @@ class PhpEmitter extends Emitter {
 		}
 	}
 
-	function scanner_state_accept($sym, $ctx) {
+	function scanner_state_accept($sym, $ctx, $ignore = false) {
 		if ($ctx) {
 			$this->indent();
 			$this->write("\$pos -= \$ctx;\n");
@@ -446,7 +446,19 @@ class PhpEmitter extends Emitter {
 			$this->indent();
 			$this->write("\$pos++;\n");
 		}
-		if (self::COMBINE_FINAL) {
+		if ($ignore) {
+			if (self::USE_GOTO) {
+				$this->indent();
+				$this->write("goto _yy_state_start;\n");
+			} else {
+				$this->indent();
+				$this->write("\$text = \$pos;\n");
+				$this->indent();
+				$this->write("\$state = 0;\n");
+				$this->indent();
+				$this->write("break;\n");
+			}
+		} else if (self::COMBINE_FINAL) {
 			$this->indent();
 			$this->write("\$ret = " . $this->grammar->term[$sym]->const_name . ";\n");
 			$this->indent();
@@ -457,14 +469,26 @@ class PhpEmitter extends Emitter {
 		}
 	}
 
-	function scanner_state_else_accept($sym, $use_switch) {
+	function scanner_state_else_accept($sym, $use_switch, $ignore = false) {
 		$this->indent();
 		if ($use_switch) {
 			$this->write("default:\n");
 		} else {
 			$this->write("} else {\n");
 		}
-		if (self::COMBINE_FINAL) {
+		if ($ignore) {
+			if (self::USE_GOTO) {
+				$this->indent(1);
+				$this->write("goto _yy_state_start;\n");
+			} else {
+				$this->indent(1);
+				$this->write("\$text = \$pos;\n");
+				$this->indent(1);
+				$this->write("\$state = 0;\n");
+				$this->indent(1);
+				$this->write("break;\n");
+			}
+		} else if (self::COMBINE_FINAL) {
 			if ($sym !== null) {
 				$this->indent(1);
 				$this->write("\$ret = " . $this->grammar->term[$sym]->const_name . ";\n");

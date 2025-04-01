@@ -71,11 +71,13 @@ class LexerDef {
 	public $func;
 	public $get_sym;
 	public $skip; /* Set */
+	public $ignore; /* Set */
 	public $dfa;
-	function __construct($func, $get_sym, $skip = null) {
+	function __construct($func, $get_sym, $skip = null, $ignore = null) {
 		$this->func = $func;
 		$this->get_sym = $get_sym;
 		$this->skip = $skip;
+		$this->ignore = $ignore;
 	}
 }
 
@@ -87,6 +89,7 @@ const IS_EMPTY        = 0x10;
 const IS_DERIVABLE    = 0x20;
 const IS_USED_IN_PRED = 0x40;
 const IS_VISITED      = 0x80;
+const IS_IGNORED      = 0x100;
 
 class TermDef {
 	public $name;
@@ -469,19 +472,34 @@ function test_unused_nterm($grammar) {
 		traverse_nt($grammar, $grammar->nonterm['SKIP'], visit_number(), IS_SKIPPED, false);
 	}
 
+	if (isset($grammar->nonterm['IGNORE'])) {
+		traverse_nt($grammar, $grammar->nonterm['IGNORE'], visit_number(), IS_IGNORED, false);
+	}
+
 	$ok = true;
 	$skip = array();
+	$ignore = array();
 	foreach ($grammar->nonterm as $name => $nt) {
 		if (($nt->flags & (IS_USED | IS_USED_IN_PRED)) == 0) {
-			if (($nt->flags & IS_SKIPPED) == 0) {
+			if (($nt->flags & (IS_SKIPPED|IS_IGNORED)) == 0) {
 				echo("Nontermonal '$name' is defined but never used\n");
 				$ok = false;
-			} else {
+			} else if ($nt->flags & IS_SKIPPED) {
+				if ($nt->flags & IS_IGNORED) {
+					echo("Nontermonal '$name' can't be ignorded\n");
+					$ok = false;
+				}
 				$skip[$name] = 1;
+			} else {
+				$ignore[$name] = 1;
 			}
 		} else {
 			if ($nt->flags & IS_SKIPPED) {
 				echo("Nontermonal '$name' can't be skipped\n");
+				$ok = false;
+			}
+			if ($nt->flags & IS_IGNORED) {
+				echo("Nontermonal '$name' can't be ignorded\n");
 				$ok = false;
 			}
 		}
@@ -492,9 +510,9 @@ function test_unused_nterm($grammar) {
 	}
 
 	if (count($skip) > 0) {
-		$grammar->nonterm[$grammar->start]->lexer = new LexerDef("get_skip_sym", "get_sym", $skip);
+		$grammar->nonterm[$grammar->start]->lexer = new LexerDef("get_skip_sym", "get_sym", $skip, $ignore);
 	} else {
-		$grammar->nonterm[$grammar->start]->lexer = new LexerDef("get_sym", "get_sym");
+		$grammar->nonterm[$grammar->start]->lexer = new LexerDef("get_sym", "get_sym", $skip, $ignore);
 	}
 
 	return $ok;
@@ -2285,6 +2303,13 @@ function build_nfa($grammar, $nterm, $scan) {
 			collect_terms($grammar, $grammar->nonterm[$name]->ast, $n, $scan, $term);
 		}
 	}
+	if ($scan->ignore != null) {
+		foreach ($scan->ignore as $name => $node) {
+			$grammar->nonterm[$name]->use_lexer = $scan;
+			$grammar->nonterm[$name]->ast->ignore = true;
+			collect_terms($grammar, $grammar->nonterm[$name]->ast, $n, $scan, $term);
+		}
+	}
 	$nfa = new FA();
 	$nfa->ctx = array();
 	foreach ($term as $p) {
@@ -2369,7 +2394,8 @@ function emit_scanner_state($f, $dfa, $s1, $v, $states, $tunnel, $bt) {
 				}
 			} else {
 				if (isset($dfa->final[$s2])) {
-					$f->scanner_state_accept($dfa->final[$s2]->name, isset($dfa->ctx[$s2]));
+					$f->scanner_state_accept($dfa->final[$s2]->name, isset($dfa->ctx[$s2]),
+						isset($dfa->final[$s2]->ignore) && $dfa->final[$s2]->ignore);
 				} else {
 					error("???");
 				}
@@ -2393,7 +2419,8 @@ function emit_scanner_state($f, $dfa, $s1, $v, $states, $tunnel, $bt) {
 				}
 			} else {
 				if (isset($dfa->final[$s2])) {
-					$f->scanner_state_accept($dfa->final[$s2]->name, isset($dfa->ctx[$s2]));
+					$f->scanner_state_accept($dfa->final[$s2]->name, isset($dfa->ctx[$s2]),
+						isset($dfa->final[$s2]->ignore) && $dfa->final[$s2]->ignore);
 				} else {
 					error("???");
 				}
@@ -2410,7 +2437,8 @@ function emit_scanner_state($f, $dfa, $s1, $v, $states, $tunnel, $bt) {
 			if ($dfa->final[$s1] === false) {
 				$f->scanner_state_else_accept(null, $use_switch);
 			} else {
-				$f->scanner_state_else_accept($dfa->final[$s1]->name, $use_switch);
+				$f->scanner_state_else_accept($dfa->final[$s1]->name, $use_switch,
+					isset($dfa->final[$s1]->ignore) && $dfa->final[$s1]->ignore);
 			}
 		} else {
 			$f->scanner_state_else_error($dfa->n, $use_switch);

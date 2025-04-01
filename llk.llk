@@ -407,6 +407,6 @@ COMMENT:
 		/\/\*([^\*]|\*+[^\*\/])*\*+\//
 ;
 
-SKIP:
-		( EOL | WS | ONE_LINE_COMMENT | COMMENT )*
+IGNORE:
+		EOL | WS | ONE_LINE_COMMENT | COMMENT
 ;
