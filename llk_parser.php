@@ -7,51 +7,52 @@ const YY_TRUE = 4;
 const YY_FALSE = 5;
 const YY__PERCENT_g_l_o_b_a_l_MINUS_v_a_r_s = 6;
 const YY__PERCENT_l_i_n_e_n_o = 7;
-const YY__PERCENT_o_u_t_p_u_t = 8;
-const YY__PERCENT_l_a_n_g_u_a_g_e = 9;
-const YY__PERCENT_i_n_d_e_n_t = 10;
-const YY__PERCENT_p_r_e_f_i_x = 11;
-const YY_PROLOGUE = 12;
-const YY_EPILOGUE = 13;
-const YY__AT = 14;
-const YY__RPAREN = 15;
-const YY__COLON = 16;
-const YY__SEMICOLON = 17;
-const YY__COMMA = 18;
-const YY_ATTR = 19;
-const YY__BAR = 20;
-const YY__AND = 21;
-const YY__BANG = 22;
-const YY__QUERY = 23;
-const YY__QUERY_PLUS = 24;
-const YY__QUERY_QUERY = 25;
-const YY__PLUS = 26;
-const YY__PLUS_PLUS = 27;
-const YY__PLUS_QUERY = 28;
-const YY__STAR = 29;
-const YY__STAR_PLUS = 30;
-const YY__STAR_QUERY = 31;
-const YY__LPAREN = 32;
-const YY__RBRACE = 33;
-const YY__LBRACE = 34;
-const YY_ACTION_CHAR = 35;
-const YY_IDENT = 36;
-const YY_IDENT_PLUS = 37;
-const YY__SLASH = 38;
-const YY__SLASH_SLASH = 39;
-const YY__POINT = 40;
-const YY__LBRACK = 41;
-const YY__UPARROW = 42;
-const YY__RBRACK = 43;
-const YY_ESCAPE_CHAR = 44;
-const YY_ESCAPE_CODE = 45;
-const YY_SINGLE_CHAR = 46;
-const YY__MINUS = 47;
-const YY_STRING = 48;
-const YY_EOL = 49;
-const YY_WS = 50;
-const YY_ONE_LINE_COMMENT = 51;
-const YY_COMMENT = 52;
+const YY__PERCENT_l_i_n_e_p_o_s = 8;
+const YY__PERCENT_o_u_t_p_u_t = 9;
+const YY__PERCENT_l_a_n_g_u_a_g_e = 10;
+const YY__PERCENT_i_n_d_e_n_t = 11;
+const YY__PERCENT_p_r_e_f_i_x = 12;
+const YY_PROLOGUE = 13;
+const YY_EPILOGUE = 14;
+const YY__AT = 15;
+const YY__RPAREN = 16;
+const YY__COLON = 17;
+const YY__SEMICOLON = 18;
+const YY__COMMA = 19;
+const YY_ATTR = 20;
+const YY__BAR = 21;
+const YY__AND = 22;
+const YY__BANG = 23;
+const YY__QUERY = 24;
+const YY__QUERY_PLUS = 25;
+const YY__QUERY_QUERY = 26;
+const YY__PLUS = 27;
+const YY__PLUS_PLUS = 28;
+const YY__PLUS_QUERY = 29;
+const YY__STAR = 30;
+const YY__STAR_PLUS = 31;
+const YY__STAR_QUERY = 32;
+const YY__LPAREN = 33;
+const YY__RBRACE = 34;
+const YY__LBRACE = 35;
+const YY_ACTION_CHAR = 36;
+const YY_IDENT = 37;
+const YY_IDENT_PLUS = 38;
+const YY__SLASH = 39;
+const YY__SLASH_SLASH = 40;
+const YY__POINT = 41;
+const YY__LBRACK = 42;
+const YY__UPARROW = 43;
+const YY__RBRACK = 44;
+const YY_ESCAPE_CHAR = 45;
+const YY_ESCAPE_CODE = 46;
+const YY_SINGLE_CHAR = 47;
+const YY__MINUS = 48;
+const YY_STRING = 49;
+const YY_EOL = 50;
+const YY_WS = 51;
+const YY_ONE_LINE_COMMENT = 52;
+const YY_COMMENT = 53;
 
 $sym_name = [
 	"<EOF>",
@@ -62,6 +63,7 @@ $sym_name = [
 	"false",
 	"%global-vars",
 	"%lineno",
+	"%linepos",
 	"%output",
 	"%language",
 	"%indent",
@@ -187,13 +189,13 @@ function get_sym() {
 												$pos++;
 												return YY__PERCENT_s_t_a_r_t;
 											} else {
-												$state = 135;
+												$state = 138;
 											}
 										} else {
-											$state = 135;
+											$state = 138;
 										}
 									} else {
-										$state = 135;
+										$state = 138;
 									}
 								} else if ($ch === "u") {
 									$pos++;
@@ -220,28 +222,28 @@ function get_sym() {
 																$pos++;
 																return YY__PERCENT_s_u_b_MINUS_s_t_a_r_t;
 															} else {
-																$state = 135;
+																$state = 138;
 															}
 														} else {
-															$state = 135;
+															$state = 138;
 														}
 													} else {
-														$state = 135;
+														$state = 138;
 													}
 												} else {
-													$state = 135;
+													$state = 138;
 												}
 											} else {
-												$state = 135;
+												$state = 138;
 											}
 										} else {
-											$state = 135;
+											$state = 138;
 										}
 									} else {
-										$state = 135;
+										$state = 138;
 									}
 								} else {
-									$state = 135;
+									$state = 138;
 								}
 								break;
 							case "c":
@@ -287,43 +289,43 @@ function get_sym() {
 																					$pos++;
 																					return YY__PERCENT_c_a_s_e_MINUS_s_e_n_s_e_t_i_v_e;
 																				} else {
-																					$state = 135;
+																					$state = 138;
 																				}
 																			} else {
-																				$state = 135;
+																				$state = 138;
 																			}
 																		} else {
-																			$state = 135;
+																			$state = 138;
 																		}
 																	} else {
-																		$state = 135;
+																		$state = 138;
 																	}
 																} else {
-																	$state = 135;
+																	$state = 138;
 																}
 															} else {
-																$state = 135;
+																$state = 138;
 															}
 														} else {
-															$state = 135;
+															$state = 138;
 														}
 													} else {
-														$state = 135;
+														$state = 138;
 													}
 												} else {
-													$state = 135;
+													$state = 138;
 												}
 											} else {
-												$state = 135;
+												$state = 138;
 											}
 										} else {
-											$state = 135;
+											$state = 138;
 										}
 									} else {
-										$state = 135;
+										$state = 138;
 									}
 								} else {
-									$state = 135;
+									$state = 138;
 								}
 								break;
 							case "g":
@@ -360,34 +362,34 @@ function get_sym() {
 																		$pos++;
 																		return YY__PERCENT_g_l_o_b_a_l_MINUS_v_a_r_s;
 																	} else {
-																		$state = 135;
+																		$state = 138;
 																	}
 																} else {
-																	$state = 135;
+																	$state = 138;
 																}
 															} else {
-																$state = 135;
+																$state = 138;
 															}
 														} else {
-															$state = 135;
+															$state = 138;
 														}
 													} else {
-														$state = 135;
+														$state = 138;
 													}
 												} else {
-													$state = 135;
+													$state = 138;
 												}
 											} else {
-												$state = 135;
+												$state = 138;
 											}
 										} else {
-											$state = 135;
+											$state = 138;
 										}
 									} else {
-										$state = 135;
+										$state = 138;
 									}
 								} else {
-									$state = 135;
+									$state = 138;
 								}
 								break;
 							case "l":
@@ -409,16 +411,31 @@ function get_sym() {
 													$pos++;
 													return YY__PERCENT_l_i_n_e_n_o;
 												} else {
-													$state = 135;
+													$state = 138;
+												}
+											} else if ($ch === "p") {
+												$pos++;
+												$ch = $buf[$pos];
+												if ($ch === "o") {
+													$pos++;
+													$ch = $buf[$pos];
+													if ($ch === "s") {
+														$pos++;
+														return YY__PERCENT_l_i_n_e_p_o_s;
+													} else {
+														$state = 138;
+													}
+												} else {
+													$state = 138;
 												}
 											} else {
-												$state = 135;
+												$state = 138;
 											}
 										} else {
-											$state = 135;
+											$state = 138;
 										}
 									} else {
-										$state = 135;
+										$state = 138;
 									}
 								} else if ($ch === "a") {
 									$pos++;
@@ -442,25 +459,25 @@ function get_sym() {
 															$pos++;
 															return YY__PERCENT_l_a_n_g_u_a_g_e;
 														} else {
-															$state = 135;
+															$state = 138;
 														}
 													} else {
-														$state = 135;
+														$state = 138;
 													}
 												} else {
-													$state = 135;
+													$state = 138;
 												}
 											} else {
-												$state = 135;
+												$state = 138;
 											}
 										} else {
-											$state = 135;
+											$state = 138;
 										}
 									} else {
-										$state = 135;
+										$state = 138;
 									}
 								} else {
-									$state = 135;
+									$state = 138;
 								}
 								break;
 							case "o":
@@ -482,19 +499,19 @@ function get_sym() {
 													$pos++;
 													return YY__PERCENT_o_u_t_p_u_t;
 												} else {
-													$state = 135;
+													$state = 138;
 												}
 											} else {
-												$state = 135;
+												$state = 138;
 											}
 										} else {
-											$state = 135;
+											$state = 138;
 										}
 									} else {
-										$state = 135;
+										$state = 138;
 									}
 								} else {
-									$state = 135;
+									$state = 138;
 								}
 								break;
 							case "i":
@@ -516,19 +533,19 @@ function get_sym() {
 													$pos++;
 													return YY__PERCENT_i_n_d_e_n_t;
 												} else {
-													$state = 135;
+													$state = 138;
 												}
 											} else {
-												$state = 135;
+												$state = 138;
 											}
 										} else {
-											$state = 135;
+											$state = 138;
 										}
 									} else {
-										$state = 135;
+										$state = 138;
 									}
 								} else {
-									$state = 135;
+									$state = 138;
 								}
 								break;
 							case "p":
@@ -550,19 +567,19 @@ function get_sym() {
 													$pos++;
 													return YY__PERCENT_p_r_e_f_i_x;
 												} else {
-													$state = 135;
+													$state = 138;
 												}
 											} else {
-												$state = 135;
+												$state = 138;
 											}
 										} else {
-											$state = 135;
+											$state = 138;
 										}
 									} else {
-										$state = 135;
+										$state = 138;
 									}
 								} else {
-									$state = 135;
+									$state = 138;
 								}
 								break;
 							case "{":
@@ -574,7 +591,7 @@ function get_sym() {
 								$state = 33;
 								break;
 							default:
-								$state = 135;
+								$state = 138;
 						}
 						break;
 					case "A":
@@ -646,7 +663,7 @@ function get_sym() {
 						if ($ch !== "e") {$state = 2; break;}
 						$pos++;
 						$ret = YY_FALSE;
-						$state = 134;
+						$state = 137;
 						break;
 					case "t":
 						$pos++;
@@ -660,7 +677,7 @@ function get_sym() {
 						if ($ch !== "e") {$state = 2; break;}
 						$pos++;
 						$ret = YY_TRUE;
-						$state = 134;
+						$state = 137;
 						break;
 					case "\"":
 						$pos++;
@@ -794,12 +811,12 @@ function get_sym() {
 						$state = 23;
 						break;
 					case "\000":
-						if ($ch === "\000" && $pos < $len) {$state = 135; break;};
+						if ($ch === "\000" && $pos < $len) {$state = 138; break;};
 						$pos++;
 						return YY_EOF;
 						break;
 					default:
-						$state = 135;
+						$state = 138;
 				}
 				break;
 			case 2:
@@ -823,7 +840,7 @@ function get_sym() {
 						$pos++;
 						$state = 5;
 					} else {
-						$state = 135;
+						$state = 138;
 					}
 				} else if ($ch === "\"") {
 					$pos++;
@@ -834,7 +851,7 @@ function get_sym() {
 					}
 					$pos++;
 				} else {
-					$state = 135;
+					$state = 138;
 				}
 				break;
 			case 6:
@@ -848,7 +865,7 @@ function get_sym() {
 						$pos++;
 						$state = 6;
 					} else {
-						$state = 135;
+						$state = 138;
 					}
 				} else if ($pos < $len && ($ch <= "&" || ($ch >= "(" && $ch <= "[") || $ch >= "]")) {
 					if ($ch === "\n") {
@@ -859,7 +876,7 @@ function get_sym() {
 					$pos++;
 					return YY_STRING;
 				} else {
-					$state = 135;
+					$state = 138;
 				}
 				break;
 			case 23:
@@ -884,7 +901,7 @@ function get_sym() {
 					}
 					$pos++;
 				} else {
-					$state = 135;
+					$state = 138;
 				}
 				break;
 			case 33:
@@ -921,7 +938,7 @@ function get_sym() {
 				} else if ($pos < $len && ($ch <= "\t" || $ch === "\v" || $ch === "\f" || $ch >= "\016")) {
 					$pos++;
 				} else {
-					$state = 135;
+					$state = 138;
 				}
 				break;
 			case 51:
@@ -939,10 +956,10 @@ function get_sym() {
 					}
 					$pos++;
 				} else {
-					$state = 135;
+					$state = 138;
 				}
 				break;
-			case 134:
+			case 137:
 				if ($ch === "(") {
 					$pos++;
 					return YY_IDENT_PLUS;
@@ -953,7 +970,7 @@ function get_sym() {
 					return $ret;
 				}
 				break;
-			case 135:
+			case 138:
 				if ($accept !== null) {
 					$pos = $accept_pos;
 					return $accept;
@@ -1490,7 +1507,7 @@ function regexp2_get_sym() {
 }
 
 function parse_grammar($sym, $grammar) {
-	while (in_array($sym, array(YY__PERCENT_s_t_a_r_t,YY__PERCENT_s_u_b_MINUS_s_t_a_r_t,YY__PERCENT_c_a_s_e_MINUS_s_e_n_s_e_t_i_v_e,YY__PERCENT_g_l_o_b_a_l_MINUS_v_a_r_s,YY__PERCENT_l_i_n_e_n_o,YY__PERCENT_o_u_t_p_u_t,YY__PERCENT_l_a_n_g_u_a_g_e,YY__PERCENT_i_n_d_e_n_t,YY__PERCENT_p_r_e_f_i_x))) {
+	while (in_array($sym, array(YY__PERCENT_s_t_a_r_t,YY__PERCENT_s_u_b_MINUS_s_t_a_r_t,YY__PERCENT_c_a_s_e_MINUS_s_e_n_s_e_t_i_v_e,YY__PERCENT_g_l_o_b_a_l_MINUS_v_a_r_s,YY__PERCENT_l_i_n_e_n_o,YY__PERCENT_l_i_n_e_p_o_s,YY__PERCENT_o_u_t_p_u_t,YY__PERCENT_l_a_n_g_u_a_g_e,YY__PERCENT_i_n_d_e_n_t,YY__PERCENT_p_r_e_f_i_x))) {
 		$sym = parse_declaration($sym, $grammar);
 	}
 	if ($sym == YY_PROLOGUE) {
@@ -1549,6 +1566,18 @@ function parse_declaration($sym, $grammar) {
 			} else if ($sym == YY_FALSE) {
 				$sym = get_sym();
 				$grammar->lineno = false;
+			} else {
+				error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
+			}
+			break;
+		case YY__PERCENT_l_i_n_e_p_o_s:
+			$sym = get_sym();
+			if ($sym == YY_TRUE) {
+				$sym = get_sym();
+				$grammar->linepos = true;
+			} else if ($sym == YY_FALSE) {
+				$sym = get_sym();
+				$grammar->linepos = false;
 			} else {
 				error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 			}

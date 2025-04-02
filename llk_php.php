@@ -6,8 +6,8 @@ class PhpEmitter extends Emitter {
 	const NEED_FORWARDS = false;
 	const COMBINE_FINAL = false;
 
-	function __construct($fn, $indent, $prefix, $global_vars, $lineno) {
-		parent::__construct($fn, $indent, $prefix, $global_vars, $lineno);
+	function __construct($fn, $indent, $prefix, $global_vars, $lineno = true, $linepos = false) {
+		parent::__construct($fn, $indent, $prefix, $global_vars, $lineno, $linepos);
 		$this->write("<?php\n");
 	}
 
@@ -34,6 +34,9 @@ class PhpEmitter extends Emitter {
 		$this->write("\$len = 0;\n");
 		$this->write("\$pos = 0;\n");
 		$this->write("\$text = 0;\n");
+		if ($this->linepos) {
+			$this->write("\$linepos = $pos;\n");
+		}
 		if ($this->lineno) {
 			$this->write("\$line = 1;\n");
 		}
@@ -240,6 +243,10 @@ class PhpEmitter extends Emitter {
 		$this->inc_indent();
 		$this->indent();
 		$this->write("global \$buf, \$pos, \$len, \$text;\n");
+		if ($this->linepos) {
+			$this->indent();
+			$this->write("global \$linepos;\n");
+		}
 		if ($this->lineno) {
 			$this->indent();
 			$this->write("global \$line;\n");
@@ -355,11 +362,31 @@ class PhpEmitter extends Emitter {
 			if (count($set) == 1 && $set[0] === "\n") {
 				$this->indent();
 				$this->write("\$line++;\n");
+				if ($this->linepos) {
+					$this->indent();
+					$this->write("\$linepos = $pos + 1;\n");
+				}
 			} else if (in_array("\n", $set, true)) {
 				$this->indent();
 				$this->write("if (\$ch === \"\\n\") {\n");
 				$this->indent(1);
 				$this->write("\$line++;\n");
+				if ($this->linepos) {
+					$this->indent();
+					$this->write("\$linepos = $pos + 1;\n");
+				}
+				$this->indent();
+				$this->write("}\n");
+			}
+		} else if ($this->linepos) {
+			if (count($set) == 1 && $set[0] === "\n") {
+				$this->indent();
+				$this->write("\$linepos = $pos + 1;\n");
+			} else if (in_array("\n", $set, true)) {
+				$this->indent();
+				$this->write("if (\$ch === \"\\n\") {\n");
+				$this->indent();
+				$this->write("\$linepos = $pos + 1;\n");
 				$this->indent();
 				$this->write("}\n");
 			}
@@ -640,6 +667,10 @@ class PhpEmitter extends Emitter {
 		$this->write("\$save_pos  = \$pos;\n");
 		$this->indent();
 		$this->write("\$save_text = \$text;\n");
+		if ($this->linepos) {
+			$this->indent();
+			$this->write("\$save_linepos = \$linepos;\n");
+		}
 		if ($this->lineno) {
 			$this->indent();
 			$this->write("\$save_line = \$line;\n");
@@ -651,6 +682,10 @@ class PhpEmitter extends Emitter {
 		$this->write("\$pos  = \$save_pos;\n");
 		$this->indent();
 		$this->write("\$text = \$save_text;\n");
+		if ($this->linepos) {
+			$this->indent();
+			$this->write("\$linepos = \$save_linepos;\n");
+		}
 		if ($this->lineno) {
 			$this->indent();
 			$this->write("\$line = \$save_line;\n");
@@ -1168,12 +1203,20 @@ class PhpEmitter extends Emitter {
 		$this->write("function $func_name(" . $this->gen_attrs($attrs, true) . ") {\n");
 		$this->indent(1);
 		$this->write("global \$pos, \$text;\n");
+		if ($this->linepos) {
+			$this->indent(1);
+			$this->write("global \$linepos;\n");
+		}
 		if ($this->lineno) {
 			$this->indent(1);
 			$this->write("global \$line;\n");
 		}
 		$this->indent(1);
 		$this->write("\$pos = \$text = 0;\n");
+		if ($this->linepos) {
+			$this->indent(1);
+			$this->write("\$linepos = 0;\n");
+		}
 		if ($this->lineno) {
 			$this->indent(1);
 			$this->write("\$line = 1;\n");

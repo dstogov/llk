@@ -32,6 +32,12 @@ declaration($grammar):
 		|
 			"false"              { $grammar->lineno = false; }
 		)
+	|	"%linepos"
+		(
+			"true"               { $grammar->linepos = true; }
+		|
+			"false"              { $grammar->linepos = false; }
+		)
 	|	"%output" string($s)     { $grammar->output = $s; }
 	|	"%language" string($s)   { $grammar->language = $s; }
 	|	"%indent" string($s)     { $grammar->indent = $s; }

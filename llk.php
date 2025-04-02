@@ -218,6 +218,7 @@ class Grammar {
 	public $case_sensetive = true;
 	public $global_vars = true;
 	public $lineno = true;
+	public $linepos = false;
 	public $prologue = null;    // string, prologue code block
 	public $epilogue = null;    // string, epilogue code block
 	public $nonterm  = array(); // list of defined non-terminals (NonTermDef)
@@ -236,13 +237,14 @@ abstract class Emitter {
 	protected $f;
 	protected $global_vars = true; /* declare global scanner variables */
 	protected $lineno = true; /* automatic line number tracking */
+	protected $linepos = false; /* automatic start line position tracking */
 	public    $indent;
 	public    $cur_indent = "";
 	public    $buf = "";
 	public    $l_prefix;
 	public    $u_prefix;
 
-	function __construct($fn, $indent = "\t", $prefix, $global_vars, $lineno) {
+	function __construct($fn, $indent = "\t", $prefix, $global_vars, $lineno = true, $linepos = false) {
 		if (EMIT_TO_STDOUT) {
 			$this->f = fopen("php://stdout", "w");
 		} else {
@@ -251,6 +253,7 @@ abstract class Emitter {
 		$this->indent = $indent;
 		$this->global_vars = $global_vars;
 		$this->lineno = $lineno;
+		$this->linepos = $linepos;
 		$this->l_prefix = strtolower($prefix);
 		$this->u_prefix = strtoupper($prefix);
 		$this->buf = "";
@@ -2887,11 +2890,11 @@ function emit_parser_func($f, $grammar, $func, $nt, $scan, $first = false, $chec
 
 function emit_code($grammar) {
 	if ($grammar->language == "php") {
-	  	$f = new PhpEmitter($grammar->output, $grammar->indent, $grammar->prefix, $grammar->global_vars, $grammar->lineno);
+		$f = new PhpEmitter($grammar->output, $grammar->indent, $grammar->prefix, $grammar->global_vars, $grammar->lineno, $grammar->linepos);
 	} else if ($grammar->language == "c") {
-	  	$f = new CEmitter($grammar->output, $grammar->indent, $grammar->prefix, $grammar->global_vars, $grammar->lineno);
+		$f = new CEmitter($grammar->output, $grammar->indent, $grammar->prefix, $grammar->global_vars, $grammar->lineno, $grammar->linepos);
 	} else {
-	  	$f = new PhpEmitter($grammar->output, $grammar->indent, $grammar->prefix, $grammar->global_vars, $grammar->lineno);
+		$f = new PhpEmitter($grammar->output, $grammar->indent, $grammar->prefix, $grammar->global_vars, $grammar->lineno, $grammar->linepos);
 	}
 	if (!EMIT_PARSER_ONLY && !EMIT_SCANNER_ONLY) {
 	  	if ($grammar->prologue !== null) {

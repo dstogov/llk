@@ -39,6 +39,9 @@ class CEmitter extends Emitter {
 			$this->write("static unsigned const char *yy_end;\n");
 			$this->write("static unsigned const char *yy_pos;\n");
 			$this->write("static unsigned const char *yy_text;\n");
+			if ($this->linepos) {
+				$this->write("static unsigned const char *yy_linepos;\n");
+			}
 			if ($this->lineno) {
 				$this->write("static int yy_line;\n");
 			}
@@ -395,11 +398,31 @@ EOF
 			if (count($set) == 1 && $set[0] === "\n") {
 				$this->indent();
 				$this->write("yy_line++;\n");
+				if ($this->linepos) {
+					$this->indent();
+					$this->write("yy_linepos = YYPOS + 1;\n");
+				}
 			} else if (in_array("\n", $set, true)) {
 				$this->indent();
 				$this->write("if (ch == '\\n') {\n");
 				$this->indent(1);
 				$this->write("yy_line++;\n");
+				if ($this->linepos) {
+					$this->indent(1);
+					$this->write("yy_linepos = YYPOS + 1;\n");
+				}
+				$this->indent();
+				$this->write("}\n");
+			}
+		} else if ($this->linepos) {
+			if (count($set) == 1 && $set[0] === "\n") {
+				$this->indent();
+				$this->write("yy_linepos = YYPOS + 1;\n");
+			} else if (in_array("\n", $set, true)) {
+				$this->indent();
+				$this->write("if (ch == '\\n') {\n");
+				$this->indent(1);
+				$this->write("yy_linepos = YYPOS + 1;\n");
 				$this->indent();
 				$this->write("}\n");
 			}
@@ -665,6 +688,10 @@ EOF
 		$this->write("save_pos  = yy_pos;\n");
 		$this->indent();
 		$this->write("save_text = yy_text;\n");
+		if ($this->linepos) {
+			$this->indent();
+			$this->write("save_linepos = yy_linepos;\n");
+		}
 		if ($this->lineno) {
 			$this->indent();
 			$this->write("save_line = yy_line;\n");
@@ -676,6 +703,10 @@ EOF
 		$this->write("yy_pos  = save_pos;\n");
 		$this->indent();
 		$this->write("yy_text = save_text;\n");
+		if ($this->linepos) {
+			$this->indent();
+			$this->write("yy_linepos = save_linepos;\n");
+		}
 		if ($this->lineno) {
 			$this->indent();
 			$this->write("yy_line = save_line;\n");
@@ -849,6 +880,10 @@ EOF
 		$this->write("const unsigned char *save_pos;\n");
 		$this->indent();
 		$this->write("const unsigned char *save_text;\n");
+		if ($this->linepos) {
+			$this->indent();
+			$this->write("const unsigned char *save_linepos;\n");
+		}
 		if ($this->lineno) {
 			$this->indent();
 			$this->write("int   save_line;\n");
@@ -1287,6 +1322,9 @@ EOF
 		$this->write("\tint sym;\n");
 		$this->write("\n");
 		$this->write("\tyy_pos = yy_text = yy_buf;\n");
+		if ($this->linepos) {
+			$this->write("\tyy_linepos = yy_pos;\n");
+		}
 		if ($this->lineno) {
 			$this->write("\tyy_line = 1;\n");
 		}
@@ -1326,6 +1364,10 @@ EOF
 		$this->write("const unsigned char *save_pos;\n");
 		$this->indent();
 		$this->write("const unsigned char *save_text;\n");
+		if ($this->linepos) {
+			$this->indent();
+			$this->write("const unsigned char *save_linepos;\n");
+		}
 		if ($this->lineno) {
 			$this->indent();
 			$this->write("int   save_line;\n");
