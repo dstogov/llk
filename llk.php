@@ -2411,7 +2411,7 @@ function emit_scanner_state($f, $dfa, $s1, $v, $states, $tunnel, $bt) {
 			$f->scanner_state_switch_start();
 		}
 		foreach ($v as $s2 => $s) {
-			$f->scanner_state_condition($first, $s, $use_switch, $dfa->n);
+			$f->scanner_state_condition($first, $s, $use_switch, $dfa->n, isset($dfa->ctx[$s2]));
 			$first = false;
 			if (isset($dfa->move[$s2])) {
 				if (SCANNER_INLINE && $s1 != $s2 && $states[$s2] == 1) {

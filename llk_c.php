@@ -371,7 +371,7 @@ EOF
 		}
 	}
 
-	function scanner_state_condition($first, $set, $use_switch, $error_state) {
+	function scanner_state_condition($first, $set, $use_switch, $error_state, $ctx = false) {
 		if ($use_switch) {
 			foreach ($set as $ch) {
 				$this->indent();
@@ -394,7 +394,9 @@ EOF
 			$this->write("$if (" . $this->gen_charset_condition($set) . ") {\n");
 		}
 		$this->inc_indent();
-		if ($this->lineno) {
+		if ($ctx) {
+			/* ignore line numbering when checking context */
+		} else if ($this->lineno) {
 			if (count($set) == 1 && $set[0] === "\n") {
 				$this->indent();
 				$this->write("yy_line++;\n");
