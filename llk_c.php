@@ -277,8 +277,9 @@ EOF
 	}
 
 	function scanner_start($func, $need_ret, $need_backtracking, $ctx) {
+		$sym_type = $this->grammar->sym_type ?? "int";
 		$this->indent();
-		$this->write("static int $func(void) {\n");
+		$this->write("static $sym_type $func(void) {\n");
 		$this->inc_indent();
 		$this->indent();
 		$this->write("char buf[64];\n");
@@ -286,12 +287,12 @@ EOF
 		$this->write("int ch;\n");
 		if (self::COMBINE_FINAL || $need_ret) {
 			$this->indent();
-			$this->write("int ret;\n");
+			$this->write("$sym_type ret;\n");
 		}
 
 		if ($need_backtracking) {
 			$this->indent();
-			$this->write("int accept = -1;\n");
+			$this->write("$sym_type accept = -1;\n");
 			$this->indent();
 			$this->write("const unsigned char *accept_pos;\n");
 		}
@@ -884,8 +885,9 @@ EOF
 	}
 
 	function la_func() {
+		$sym_type = $this->grammar->sym_type ?? "int";
 		$this->indent();
-		$this->write("int   sym2;\n");
+		$this->write("$sym_type   sym2;\n");
 		if (!self::USE_GOTO) {
 			$this->indent();
 			$this->write("int   state;\n");
@@ -1017,12 +1019,13 @@ EOF
 	}
 
 	function parser_func_start($name, $first, $attrs) {
+		$sym_type = $this->grammar->sym_type ?? "int";
 		$this->indent();
-		$this->write("static int $name(" . ($first ? "" : "int sym") . $this->gen_attrs($attrs, $first) . ") {\n");
+		$this->write("static $sym_type $name(" . ($first ? "" : "$sym_type sym") . $this->gen_attrs($attrs, $first) . ") {\n");
 		$this->inc_indent();
 		if ($first) {
 			$this->indent();
-			$this->write("int sym;");
+			$this->write("$sym_type sym;");
 			$this->write("\n");
 		}
 	}
@@ -1031,8 +1034,9 @@ EOF
 	}
 
 	function parser_forward_func($name, $first, $attrs) {
+		$sym_type = $this->grammar->sym_type ?? "int";
 		$this->indent();
-		$this->write("static int $name(" . ($first ? "" : "int sym") . $this->gen_attrs($attrs, $first) . ");\n");
+		$this->write("static $sym_type $name(" . ($first ? "" : "$sym_type sym") . $this->gen_attrs($attrs, $first) . ");\n");
 	}
 
 	function parser_forward_end() {
@@ -1350,13 +1354,15 @@ EOF
 	}
 
 	function parser_forward_synpred($name) {
+		$sym_type = $this->grammar->sym_type ?? "int";
 		$this->indent();
-		$this->write("static int $name(int sym);\n");
+		$this->write("static $sym_type $name($sym_type sym);\n");
 	}
 
 	function parser_synpred_start($pred) {
+		$sym_type = $this->grammar->sym_type ?? "int";
 		$this->indent();
-		$this->write("static int _{$pred->name}(int sym) {\n");
+		$this->write("static $sym_type _{$pred->name}($sym_type sym) {\n");
 		$this->inc_indent();
 	}
 
@@ -1369,11 +1375,12 @@ EOF
 	}
 
 	function parser_synpred($pred) {
+		$sym_type = $this->grammar->sym_type ?? "int";
 		$this->indent();
-		$this->write("static int {$pred->name}(int sym) {\n");
+		$this->write("static $sym_type {$pred->name}($sym_type sym) {\n");
 		$this->inc_indent();
 		$this->indent();
-		$this->write("int ret;\n");
+		$this->write("$sym_type ret;\n");
 		$this->indent();
 		$this->write("const unsigned char *save_pos;\n");
 		$this->indent();
