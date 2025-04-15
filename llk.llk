@@ -51,6 +51,7 @@ declaration($grammar):
 			"false"              { $grammar->ignore_parser = false; }
 		)
 	|	"%sym-type" ident($id)   { $grammar->sym_type = $id; }
+	|	"%check-id" ident($id)   { $grammar->check_id = $id; }
 	|	"%output" string($s)     { $grammar->output = $s; }
 	|	"%language" string($s)   { $grammar->language = $s; }
 	|	"%indent" string($s)     { $grammar->indent = $s; }

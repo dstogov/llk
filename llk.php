@@ -2710,7 +2710,7 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 				$q = $q->alt;
 			}
 			$first = true;
-			$use_switch = ($n - $p->has_pred > $f::IF_VS_CASE);
+			$use_switch = ($n - $p->has_pred > $f::IF_VS_CASE && !isset($grammar->check_id));
 			if ($p->has_pred) {
 				// generate "if" statement for alternatives with predicates
 				$q = $p;

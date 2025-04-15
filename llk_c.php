@@ -731,19 +731,35 @@ EOF
 	function gen_condition($set, $neg = false) {
 		if (count($set) == 0) {
 			return $neg ? "0" : "1";
-		} else if (count($set) <= self::IF_VS_SET) {
+		} else if (count($set) <= self::IF_VS_SET || $this->grammar->ignore_scanner) {
 			foreach($set as $sym => $dummy) {
 				if ($neg) {
 					if (isset($s)) {
-						$s .= " && sym != " . $this->grammar->term[$sym]->const_name;
+						if ($sym == "ID" && isset($this->grammar->check_id)) {
+							$s .= " && !" . $this->grammar->check_id . "(sym)";
+						} else {
+							$s .= " && sym != " . $this->grammar->term[$sym]->const_name;
+						}
 					} else {
-						$s = "sym != " . $this->grammar->term[$sym]->const_name;
+						if ($sym == "ID" && isset($this->grammar->check_id)) {
+							$s = "!" . $this->grammar->check_id . "(sym)";
+						} else {
+							$s = "sym != " . $this->grammar->term[$sym]->const_name;
+						}
 					}
 				} else {
 					if (isset($s)) {
-						$s .= " || sym == " . $this->grammar->term[$sym]->const_name;
+						if ($sym == "ID" && isset($this->grammar->check_id)) {
+							$s .= " || " . $this->grammar->check_id . "(sym)";
+						} else {
+							$s .= " || sym == " . $this->grammar->term[$sym]->const_name;
+						}
 					} else {
-						$s = "sym == " . $this->grammar->term[$sym]->const_name;
+						if ($sym == "ID" && isset($this->grammar->check_id)) {
+							$s = $this->grammar->check_id . "(sym)";
+						} else {
+							$s = "sym == " . $this->grammar->term[$sym]->const_name;
+						}
 					}
 				}
 			}
@@ -751,9 +767,17 @@ EOF
 			$n = (count($this->grammar->term) + (8 - 1)) >> 3;
 			$bitset = str_repeat("\0", $n);
 			if ($neg) {
-				$s = "!YY_IN_SET(sym, (";
+				if (isset($this->grammar->check_id) && isset($set["ID"])) {
+					$s = "!" . $this->grammar->check_id . "(sym) && !YY_IN_SET(sym, (";
+				} else {
+					$s = "!YY_IN_SET(sym, (";
+				}
 			} else {
-				$s = "YY_IN_SET(sym, (";
+				if (isset($this->grammar->check_id) && isset($set["ID"])) {
+					$s = $this->grammar->check_id . "(sym) || YY_IN_SET(sym, (";
+				} else {
+					$s = "YY_IN_SET(sym, (";
+				}
 			}
 			$first = true;
 			foreach($set as $sym => $dummy) {
@@ -837,19 +861,35 @@ EOF
 	function gen_dfa_condition($set, $neg = false) {
 		if (count($set) == 0) {
 			return "1";
-		} else if (count($set) <= self::IF_VS_SET) {
+		} else if (count($set) <= self::IF_VS_SET || $this->grammar->ignore_scanner) {
 			foreach($set as $sym) {
 				if ($neg) {
 					if (isset($s)) {
-						$s .= " && sym2 != " . $this->grammar->term[$sym]->const_name;
+						if ($sym == "ID" && isset($this->grammar->check_id)) {
+							$s .= " && !" . $this->grammar->check_id . "(sym2)";
+						} else {
+							$s .= " && sym2 != " . $this->grammar->term[$sym]->const_name;
+						}
 					} else {
-						$s = "sym2 != " . $this->grammar->term[$sym]->const_name;
+						if ($sym == "ID" && isset($this->grammar->check_id)) {
+							$s = "!" . $this->grammar->check_id . "(sym2)";
+						} else {
+							$s = "sym2 != " . $this->grammar->term[$sym]->const_name;
+						}
 					}
 				} else {
 					if (isset($s)) {
-						$s .= " || sym2 == " . $this->grammar->term[$sym]->const_name;
+						if ($sym == "ID" && isset($this->grammar->check_id)) {
+							$s .= " || " . $this->grammar->check_id . "(sym2)";
+						} else {
+							$s .= " || sym2 == " . $this->grammar->term[$sym]->const_name;
+						}
 					} else {
-						$s = "sym2 == " . $this->grammar->term[$sym]->const_name;
+						if ($sym == "ID" && isset($this->grammar->check_id)) {
+							$s = $this->grammar->check_id . "(sym2)";
+						} else {
+							$s = "sym2 == " . $this->grammar->term[$sym]->const_name;
+						}
 					}
 				}
 			}
@@ -857,9 +897,17 @@ EOF
 			$n = (count($this->grammar->term) + (8 - 1)) >> 3;
 			$bitset = str_repeat("\0", $n);
 			if ($neg) {
-				$s = "!YY_IN_SET(sym2, (";
+				if (isset($this->grammar->check_id) && isset($set["ID"])) {
+					$s = "!" . $this->grammar->check_id . "(sym2) && !YY_IN_SET(sym2, (";
+				} else {
+					$s = "!YY_IN_SET(sym2, (";
+				}
 			} else {
-				$s = "YY_IN_SET(sym2, (";
+				if (isset($this->grammar->check_id) && isset($set["ID"])) {
+					$s = $this->grammar->check_id . "(sym2) || YY_IN_SET(sym2, (";
+				} else {
+					$s = "YY_IN_SET(sym2, (";
+				}
 			}
 			$first = true;
 			foreach($set as $sym) {
@@ -1058,7 +1106,11 @@ EOF
 
 	function parser_expect($sym, $check_only = false) {
 		$this->indent();
-		$this->write("if (sym != " . $this->grammar->term[$sym]->const_name . ") {\n");
+		if ($sym == "ID" && isset($this->grammar->check_id)) {
+			$this->write("if (!" . $this->grammar->check_id . "(sym)) {\n");
+		} else {
+			$this->write("if (sym != " . $this->grammar->term[$sym]->const_name . ") {\n");
+		}
 		$this->indent(1);
 		if ($check_only) {
 			$this->write("return -1;\n");
