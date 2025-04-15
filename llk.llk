@@ -38,6 +38,18 @@ declaration($grammar):
 		|
 			"false"              { $grammar->linepos = false; }
 		)
+	|	"%ignore-scanner"
+		(
+			"true"               { $grammar->ignore_scanner = true; }
+		|
+			"false"              { $grammar->ignore_scanner = false; }
+		)
+	|	"%ignore_parser"
+		(
+			"true"               { $grammar->ignore_parser = true; }
+		|
+			"false"              { $grammar->ignore_parser = false; }
+		)
 	|	"%output" string($s)     { $grammar->output = $s; }
 	|	"%language" string($s)   { $grammar->language = $s; }
 	|	"%indent" string($s)     { $grammar->indent = $s; }

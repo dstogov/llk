@@ -6,9 +6,7 @@ class CEmitter extends Emitter {
 	const NEED_FORWARDS = true;
 	const COMBINE_FINAL = true;
 
-	function prologue($grammar) {
-		$this->grammar = $grammar;
-
+	function prologue_scanner($grammar) {
 		$this->write("#define YYPOS cpos\n");
 		$this->write("#define YYEND cend\n");
 		$this->write("\n");
@@ -28,11 +26,6 @@ class CEmitter extends Emitter {
 		}
 		$this->write("\tNULL\n");
 		$this->write("};\n\n");
-
-		$this->write("#define YY_IN_SET(sym, set, bitset) \\\n");
-		$this->indent(1);
-		$this->write("(bitset[sym>>3] & (1 << (sym & 0x7)))\n");
-		$this->write("\n");
 
 		if ($this->global_vars) {
 			$this->write("static unsigned char *yy_buf;\n");
@@ -109,6 +102,25 @@ const char *yy_escape_string(char *buf, size_t size, const unsigned char *str, s
 
 EOF
 );
+	}
+
+	function prologue_parser($grammar) {
+		$this->write("#define YY_IN_SET(sym, set, bitset) \\\n");
+		$this->indent(1);
+		$this->write("(bitset[sym>>3] & (1 << (sym & 0x7)))\n");
+		$this->write("\n");
+	}
+
+	function prologue($grammar) {
+		$this->grammar = $grammar;
+
+		if (!$grammar->ignore_scanner) {
+			$this->prologue_scanner($grammar);
+		}
+
+		if (!$grammar->ignore_parser) {
+			$this->prologue_parser($grammar);
+		}
 	}
 
 	function gen_escape_char($c) {

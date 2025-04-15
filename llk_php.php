@@ -11,9 +11,7 @@ class PhpEmitter extends Emitter {
 		$this->write("<?php\n");
 	}
 
-	function prologue($grammar) {
-		$this->grammar = $grammar;
-
+	function prologue_scanner($grammar) {
 		foreach ($grammar->term as $term) {
 			$this->write("const $term->const_name = $term->val;\n");
 		}
@@ -82,6 +80,21 @@ class PhpEmitter extends Emitter {
 		$this->write("\treturn (\$text_len - \$f - \$l > 0) ? substr(\$buf, \$text + \$f, \$text_len - \$f - \$l) : null;\n");
 		$this->write("}\n");
 		$this->write("\n");
+	}
+
+	function prologue_parser($grammar) {
+	}
+
+	function prologue($grammar) {
+		$this->grammar = $grammar;
+
+		if (!$grammar->ignore_scanner) {
+			$this->prologue_scanner($grammar);
+		}
+
+		if (!$grammar->ignore_parser) {
+			$this->prologue_parser($grammar);
+		}
 	}
 
 	function gen_escape_char($c) {

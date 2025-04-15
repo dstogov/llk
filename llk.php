@@ -243,6 +243,8 @@ abstract class Emitter {
 	public    $buf = "";
 	public    $l_prefix;
 	public    $u_prefix;
+	public    $emit_scanner;
+	public    $emit_parser;
 
 	function __construct($fn, $indent = "\t", $prefix, $global_vars, $lineno = true, $linepos = false) {
 		if (EMIT_TO_STDOUT) {
@@ -2682,7 +2684,7 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 				$scan = $scanner;
 			}
 			$f->parser_get_sym(
-				isset($scanner->skip[$p->name]) ? $scan->func : $scan->get_sym);
+				isset($scan) ? (isset($scanner->skip[$p->name]) ? $scan->func : $scan->get_sym) : "get_sym");
 		} else if ($p instanceof NonTerminal) {
 			$f->parser_nterm($p->name, IGNORE_ATTRIBUTES ? null : $p->attrs,
 				isset($scanner->skip[$p->name]), $in_pred);
@@ -2896,15 +2898,23 @@ function emit_code($grammar) {
 	} else {
 		$f = new PhpEmitter($grammar->output, $grammar->indent, $grammar->prefix, $grammar->global_vars, $grammar->lineno, $grammar->linepos);
 	}
-	if (!EMIT_PARSER_ONLY && !EMIT_SCANNER_ONLY) {
-	  	if ($grammar->prologue !== null) {
-			$f->write($grammar->prologue);
-	  	}
 
-		$f->prologue($grammar);
+	if (!isset($grammar->ignore_scanner)) {
+		$grammar->ignore_scanner = IGNORE_SCANNER;
+	}
+	if (!isset($grammar->ignore_parser)) {
+		$grammar->ignore_parser = IGNORE_PARSER;
+	}
 
-		if ($f::NEED_FORWARDS) {
-			$f->parser_forward_start();
+	if ($grammar->prologue !== null) {
+		$f->write($grammar->prologue);
+	}
+
+	$f->prologue($grammar);
+
+	if ($f::NEED_FORWARDS) {
+		$f->parser_forward_start();
+		if (!$grammar->ignore_scanner) {
 			foreach ($grammar->scanners as $scan) {
 		  		if ($scan->skip !== null) {
 		  			foreach ($scan->skip as $name => $nt) {
@@ -2916,6 +2926,8 @@ function emit_code($grammar) {
 		  			}
 	  			}
 			}
+		}
+		if (!$grammar->ignore_parser) {
 		  	foreach ($grammar->nonterm as $name => $nt) {
 				if ($nt->flags & IS_USED_IN_PRED) {
 					$f->parser_forward_func("check_$name", false, null);
@@ -2929,10 +2941,10 @@ function emit_code($grammar) {
 			foreach ($grammar->pred as $pred) {
 				$f->parser_forward_synpred($pred->name);
 			}
-			$f->parser_forward_end();
 		}
+		$f->parser_forward_end();
 	}
-  	if (!EMIT_PARSER_ONLY) {
+	if (!$grammar->ignore_scanner) {
 		foreach ($grammar->scanners as $scan) {
 			emit_scanner($f, $scan->func, $scan->dfa);
 	  		if ($scan->skip !== null) {
@@ -2946,7 +2958,7 @@ function emit_code($grammar) {
 	  		}
 		}
 	}
-  	if (!EMIT_SCANNER_ONLY) {
+	if (!$grammar->ignore_parser) {
 	  	foreach ($grammar->nonterm as $name => $nt) {
 	  		if ($nt->flags & IS_USED_IN_PRED) {
 				$scan = $nt->use_lexer;
@@ -2965,7 +2977,7 @@ function emit_code($grammar) {
 			if (!$pred->start instanceof NonTerminal ||
 			    $pred->start->next != null) {
 				$f->parser_synpred_start($pred);
-				emit_parser_code($f, $grammar, $pred->name, $pred->start, array(), $scan, 1);
+				emit_parser_code($f, $grammar, $pred->name, $pred->start, array(), isset($scan) ? $scan : null, 1);
 				$f->parser_synpred_end($pred);
 			}
 			$f->parser_synpred($pred);
@@ -2982,10 +2994,8 @@ function emit_code($grammar) {
 		$f->main("parse", $grammar->start, IGNORE_ATTRIBUTES ? null : $grammar->nonterm[$grammar->start]->attrs);
 	}
 
-  	if (!EMIT_PARSER_ONLY && !EMIT_SCANNER_ONLY) {
-	  	if ($grammar->epilogue !== null) {
-			$f->write($grammar->epilogue);
-	  	}
+	if ($grammar->epilogue !== null) {
+		$f->write($grammar->epilogue);
 	}
 
   	$f->close();
@@ -3067,10 +3077,10 @@ for ($i = 1; $i < $argc; $i++) {
 			define("ALT_DFA", true);
 		} else if ($argv[$i] == "--ll1") {
 			define("LL1", true);
-		} else if ($argv[$i] == "--emit-scanner-only") {
-			define("EMIT_SCANNER_ONLY", true);
-		} else if ($argv[$i] == "--emit-parser-only") {
-			define("EMIT_PARSER_ONLY", true);
+		} else if ($argv[$i] == "--ignore-scanner") {
+			define("IGNORE_SCANNER", true);
+		} else if ($argv[$i] == "--ignore-parser") {
+			define("IGNORE_PARSER", true);
 		} else if ($argv[$i] == "--ignore-actions") {
 			define("IGNORE_ACTIONS", true);
 		} else if ($argv[$i] == "--ignore-attributes") {
@@ -3142,11 +3152,11 @@ if (!defined("ALT_DFA")) {
 if (!defined("LL1")) {
 	define("LL1", false);
 }
-if (!defined("EMIT_SCANNER_ONLY")) {
-	define("EMIT_SCANNER_ONLY", false);
+if (!defined("IGNORE_SCANNER")) {
+	define("IGNORE_SCANNER", false);
 }
-if (!defined("EMIT_PARSER_ONLY")) {
-	define("EMIT_PARSER_ONLY", false);
+if (!defined("IGNORE_PARSER")) {
+	define("IGNORE_PARSER", false);
 }
 if (!defined("EMIT_TO_STDOUT")) {
 	define("EMIT_TO_STDOUT", false);
