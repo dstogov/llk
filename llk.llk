@@ -44,12 +44,13 @@ declaration($grammar):
 		|
 			"false"              { $grammar->ignore_scanner = false; }
 		)
-	|	"%ignore_parser"
+	|	"%ignore-parser"
 		(
 			"true"               { $grammar->ignore_parser = true; }
 		|
 			"false"              { $grammar->ignore_parser = false; }
 		)
+	|	"%c-char" string($s)     { $grammar->c_char = $s; }
 	|	"%sym-type" ident($id)   { $grammar->sym_type = $id; }
 	|	"%check-id" ident($id)   { $grammar->check_id = $id; }
 	|	"%output" string($s)     { $grammar->output = $s; }

@@ -6,6 +6,8 @@ class CEmitter extends Emitter {
 	const NEED_FORWARDS = true;
 	const COMBINE_FINAL = true;
 
+	public $char = "unsigned char";
+
 	function prologue_scanner($grammar) {
 		$this->write("#define YYPOS cpos\n");
 		$this->write("#define YYEND cend\n");
@@ -28,12 +30,12 @@ class CEmitter extends Emitter {
 		$this->write("};\n\n");
 
 		if ($this->global_vars) {
-			$this->write("static unsigned char *yy_buf;\n");
-			$this->write("static const unsigned char *yy_end;\n");
-			$this->write("static const unsigned char *yy_pos;\n");
-			$this->write("static const unsigned char *yy_text;\n");
+			$this->write("static {$this->char} *yy_buf;\n");
+			$this->write("static const {$this->char} *yy_end;\n");
+			$this->write("static const {$this->char} *yy_pos;\n");
+			$this->write("static const {$this->char} *yy_text;\n");
 			if ($this->linepos) {
-				$this->write("static const unsigned char *yy_linepos;\n");
+				$this->write("static const {$this->char} *yy_linepos;\n");
 			}
 			if ($this->lineno) {
 				$this->write("static int yy_line;\n");
@@ -42,7 +44,7 @@ class CEmitter extends Emitter {
 		}
 
 		$this->write(<<<'EOF'
-size_t yy_escape(char *buf, unsigned char ch)
+size_t yy_escape(char *buf, int ch)
 {
 	switch (ch) {
 		case '\\': buf[0] = '\\'; buf[1] = '\\'; return 2;
@@ -71,7 +73,7 @@ size_t yy_escape(char *buf, unsigned char ch)
 	}
 }
 
-const char *yy_escape_char(char *buf, unsigned char ch)
+const char *yy_escape_char(char *buf, int ch)
 {
 	size_t len = yy_escape(buf, ch);
 	buf[len] = 0;
@@ -113,6 +115,10 @@ EOF
 
 	function prologue($grammar) {
 		$this->grammar = $grammar;
+
+		if (isset($grammar->c_char)) {
+			$this->char = $grammar->c_char;
+		}
 
 		if (!$grammar->ignore_scanner) {
 			$this->prologue_scanner($grammar);
@@ -298,9 +304,17 @@ EOF
 		}
 
 		$this->indent();
-		$this->write("const unsigned char *cpos = yy_pos;\n");
+		if ($this->char != "unsigned char") {
+			$this->write("const unsigned char *cpos = (const unsigned char*)yy_pos;\n");
+		} else {
+			$this->write("const unsigned char *cpos = yy_pos;\n");
+		}
 		$this->indent();
-		$this->write("const unsigned char *cend = yy_end;\n");
+		if ($this->char != "unsigned char") {
+			$this->write("const unsigned char *cend = (const unsigned char*)yy_end;\n");
+		} else {
+			$this->write("const unsigned char *cend = yy_end;\n");
+		}
 		if (!self::USE_GOTO) {
 			$this->indent();
 			$this->write("int state;\n");
@@ -315,7 +329,11 @@ EOF
 			$this->write("_yy_state_start:\n");
 		}
 		$this->indent();
-		$this->write("yy_text = YYPOS;\n");
+		if ($this->char != "unsigned char") {
+			$this->write("yy_text = (const {$this->char}*)YYPOS;\n");
+		} else {
+			$this->write("yy_text = YYPOS;\n");
+		}
 	}
 
 	function scanner_loop_start() {
@@ -415,7 +433,11 @@ EOF
 				$this->write("yy_line++;\n");
 				if ($this->linepos) {
 					$this->indent();
-					$this->write("yy_linepos = YYPOS + 1;\n");
+					if ($this->char != "unsigned char") {
+						$this->write("yy_linepos = (const {$this->char}*)YYPOS + 1;\n");
+					} else {
+						$this->write("yy_linepos = YYPOS + 1;\n");
+					}
 				}
 			} else if (in_array("\n", $set, true)) {
 				$this->indent();
@@ -424,7 +446,11 @@ EOF
 				$this->write("yy_line++;\n");
 				if ($this->linepos) {
 					$this->indent(1);
-					$this->write("yy_linepos = YYPOS + 1;\n");
+					if ($this->char != "unsigned char") {
+						$this->write("yy_linepos = (const {$this->char}*)YYPOS + 1;\n");
+					} else {
+						$this->write("yy_linepos = YYPOS + 1;\n");
+					}
 				}
 				$this->indent();
 				$this->write("}\n");
@@ -432,12 +458,20 @@ EOF
 		} else if ($this->linepos) {
 			if (count($set) == 1 && $set[0] === "\n") {
 				$this->indent();
-				$this->write("yy_linepos = YYPOS + 1;\n");
+				if ($this->char != "unsigned char") {
+					$this->write("yy_linepos = (const {$this->char}*)YYPOS + 1;\n");
+				} else {
+					$this->write("yy_linepos = YYPOS + 1;\n");
+				}
 			} else if (in_array("\n", $set, true)) {
 				$this->indent();
 				$this->write("if (ch == '\\n') {\n");
 				$this->indent(1);
-				$this->write("yy_linepos = YYPOS + 1;\n");
+				if ($this->char != "unsigned char") {
+					$this->write("yy_linepos = (const {$this->char}*)YYPOS + 1;\n");
+				} else {
+					$this->write("yy_linepos = YYPOS + 1;\n");
+				}
 				$this->indent();
 				$this->write("}\n");
 			}
@@ -637,7 +671,11 @@ EOF
 			$this->indent();
 			$this->write("if (accept >= 0) {\n");
 			$this->indent(1);
-			$this->write("yy_pos = accept_pos;\n");
+			if ($this->char != "unsigned char") {
+				$this->write("yy_pos = (const {$this->char}*)accept_pos;\n");
+			} else {
+				$this->write("yy_pos = accept_pos;\n");
+			}
 			$this->indent(1);
 			$this->write("return accept;\n");
 			$this->indent();
@@ -649,20 +687,32 @@ EOF
 		$this->indent(1);
 		$this->write("yy_error(\"unexpected <EOF>\");\n");
 		$this->indent();
-		$this->write("} else if (YYPOS == yy_text) {\n");
+		if ($this->char != "unsigned char") {
+			$this->write("} else if (YYPOS == (const unsigned char*)yy_text) {\n");
+		} else {
+			$this->write("} else if (YYPOS == yy_text) {\n");
+		}
 		$this->indent(1);
 		$this->write("yy_error_str(\"unexpected character\",  yy_escape_char(buf, ch));\n");
 		$this->indent();
 		$this->write("} else {\n");
 		$this->indent(1);
-		$this->write("yy_error_str(\"unexpected sequence\", yy_escape_string(buf, sizeof(buf), yy_text, 1 + YYPOS - yy_text));\n");
+		if ($this->char != "unsigned char") {
+			$this->write("yy_error_str(\"unexpected sequence\", yy_escape_string(buf, sizeof(buf), (const unsigned char*)yy_text, 1 + YYPOS - (const unsigned char*)yy_text));\n");
+		} else {
+			$this->write("yy_error_str(\"unexpected sequence\", yy_escape_string(buf, sizeof(buf), yy_text, 1 + YYPOS - yy_text));\n");
+		}
 		$this->indent();
 		$this->write("}\n");
 		$this->indent();
 		$this->write("YYPOS++;\n");
 		if (!self::USE_GOTO) {
 			$this->indent();
-			$this->write("yy_text = YYPOS;\n");
+			if ($this->char != "unsigned char") {
+				$this->write("yy_text = (const {$this->char}*)YYPOS;\n");
+			} else {
+				$this->write("yy_text = YYPOS;\n");
+			}
 			$this->indent();
 			$this->write("state = 0;\n");
 			$this->indent();
@@ -685,7 +735,11 @@ EOF
 		} else if (self::COMBINE_FINAL) {
 			$this->write("_yy_fin:\n");
 			$this->indent();
-			$this->write("yy_pos = YYPOS;\n");
+			if ($this->char != "unsigned char") {
+				$this->write("yy_pos = (const {$this->char}*)YYPOS;\n");
+			} else {
+				$this->write("yy_pos = YYPOS;\n");
+			}
 			$this->indent(0);
 			$this->write("return ret;\n");
 		}
@@ -941,16 +995,16 @@ EOF
 			$this->write("int   state;\n");
 		}
 		$this->indent();
-		$this->write("const unsigned char *save_pos;\n");
+		$this->write("const {$this->char} *save_pos;\n");
 		$this->indent();
-		$this->write("const unsigned char *save_text;\n");
+		$this->write("const {$this->char} *save_text;\n");
 		if ($this->linepos) {
 			$this->indent();
-			$this->write("const unsigned char *save_linepos;\n");
+			$this->write("const {$this->char} *save_linepos;\n");
 		}
 		if ($this->lineno) {
 			$this->indent();
-			$this->write("int   save_line;\n");
+			$this->write("int save_line;\n");
 		}
 	}
 
@@ -1434,16 +1488,16 @@ EOF
 		$this->indent();
 		$this->write("$sym_type ret;\n");
 		$this->indent();
-		$this->write("const unsigned char *save_pos;\n");
+		$this->write("const {$this->char} *save_pos;\n");
 		$this->indent();
-		$this->write("const unsigned char *save_text;\n");
+		$this->write("const {$this->char} *save_text;\n");
 		if ($this->linepos) {
 			$this->indent();
-			$this->write("const unsigned char *save_linepos;\n");
+			$this->write("const {$this->char} *save_linepos;\n");
 		}
 		if ($this->lineno) {
 			$this->indent();
-			$this->write("int   save_line;\n");
+			$this->write("int save_line;\n");
 		}
 		$this->write("\n");
 		$this->save_pos();
