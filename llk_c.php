@@ -29,11 +29,11 @@ class CEmitter extends Emitter {
 
 		if ($this->global_vars) {
 			$this->write("static unsigned char *yy_buf;\n");
-			$this->write("static unsigned const char *yy_end;\n");
-			$this->write("static unsigned const char *yy_pos;\n");
-			$this->write("static unsigned const char *yy_text;\n");
+			$this->write("static const unsigned char *yy_end;\n");
+			$this->write("static const unsigned char *yy_pos;\n");
+			$this->write("static const unsigned char *yy_text;\n");
 			if ($this->linepos) {
-				$this->write("static unsigned const char *yy_linepos;\n");
+				$this->write("static const unsigned char *yy_linepos;\n");
 			}
 			if ($this->lineno) {
 				$this->write("static int yy_line;\n");
