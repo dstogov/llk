@@ -2728,13 +2728,7 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 //???					$f->inc_indent($indent);
 				}
 			}
-			if ($use_switch) {
-				if ($use_dfa) {
-					$f->parser_alt_switch($p->state);
-				} else {
-					$f->parser_switch();
-				}
-			}
+
 			$everything_checked = false;
 			$set = comp_first_set($grammar, $p);
 			if ($set === $checked) {
@@ -2752,6 +2746,15 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 				}
 				$everything_checked = true;
 			}
+
+			if ($use_switch) {
+				if ($use_dfa) {
+					$f->parser_alt_switch($p->state);
+				} else {
+					$f->parser_switch();
+				}
+			}
+
 			$q = $p;
 			while ($q != null) {
 				if (!($q->start instanceof Predicate)) {
