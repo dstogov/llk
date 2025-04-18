@@ -1462,7 +1462,7 @@ EOF
 	function parser_forward_synpred($name) {
 		$sym_type = $this->grammar->sym_type ?? "int";
 		$this->indent();
-		$this->write("static $sym_type $name($sym_type sym);\n");
+		$this->write("static int $name($sym_type sym);\n");
 	}
 
 	function parser_synpred_start($pred) {
@@ -1483,34 +1483,37 @@ EOF
 	function parser_synpred($pred) {
 		$sym_type = $this->grammar->sym_type ?? "int";
 		$this->indent();
-		$this->write("static $sym_type {$pred->name}($sym_type sym) {\n");
+		$this->write("static int {$pred->name}($sym_type sym) {\n");
 		$this->inc_indent();
 		$this->indent();
-		$this->write("$sym_type ret;\n");
-		$this->indent();
-		$this->write("const {$this->char} *save_pos;\n");
-		$this->indent();
-		$this->write("const {$this->char} *save_text;\n");
-		if ($this->linepos) {
-			$this->indent();
-			$this->write("const {$this->char} *save_linepos;\n");
-		}
-		if ($this->lineno) {
-			$this->indent();
-			$this->write("int save_line;\n");
-		}
-		$this->write("\n");
-		$this->save_pos();
-		$this->indent();
-		if (!$pred->start instanceof NonTerminal ||
-		    $pred->start->next != null) {
-			$this->write("ret = _{$pred->name}(sym) != -1;\n");
+		if ($pred->start instanceof Terminal && $pred->start->next == null) {
+			$this->write("return sym == " . $this->grammar->term[$pred->start->name]->const_name . ";\n");
 		} else {
-			$this->write("ret = check_" . $pred->start->name . "(sym) != -1;\n");
+			$this->write("$sym_type ret;\n");
+			$this->indent();
+			$this->write("const {$this->char} *save_pos;\n");
+			$this->indent();
+			$this->write("const {$this->char} *save_text;\n");
+			if ($this->linepos) {
+				$this->indent();
+				$this->write("const {$this->char} *save_linepos;\n");
+			}
+			if ($this->lineno) {
+				$this->indent();
+				$this->write("int save_line;\n");
+			}
+			$this->write("\n");
+			$this->save_pos();
+			$this->indent();
+			if (!$pred->start instanceof NonTerminal || $pred->start->next != null) {
+				$this->write("ret = _{$pred->name}(sym) != -1;\n");
+			} else {
+				$this->write("ret = check_" . $pred->start->name . "(sym) != -1;\n");
+			}
+			$this->restore_pos();
+			$this->indent();
+			$this->write("return ret;\n");
 		}
-		$this->restore_pos();
-		$this->indent();
-		$this->write("return ret;\n");
 		$this->dec_indent();
 		$this->write("}\n\n");
 	}

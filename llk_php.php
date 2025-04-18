@@ -1266,19 +1266,23 @@ class PhpEmitter extends Emitter {
 		$this->write("function {$pred->name}(\$sym) {\n");
 		$this->inc_indent();
 		$this->indent();
-		$this->write("\tglobal \$pos, \$text, \$line;\n");
-		$this->write("\n");
-		$this->save_pos();
-		$this->indent();
-		if (!$pred->start instanceof NonTerminal ||
-		    $pred->start->next != null) {
-			$this->write("\$ret = _{$pred->name}(\$sym) != false;\n");
+		if ($pred->start instanceof Terminal && $pred->start->next == null) {
+			$this->write("return \$sym == " . $this->grammar->term[$pred->start->name]->const_name . ";\n");
 		} else {
-			$this->write("\$ret = check_" . $pred->start->name . "(\$sym) != false;\n");
+			$this->write("\tglobal \$pos, \$text, \$line;\n");
+			$this->write("\n");
+			$this->save_pos();
+			$this->indent();
+			if (!$pred->start instanceof NonTerminal ||
+			    $pred->start->next != null) {
+				$this->write("\$ret = _{$pred->name}(\$sym) != false;\n");
+			} else {
+				$this->write("\$ret = check_" . $pred->start->name . "(\$sym) != false;\n");
+			}
+			$this->restore_pos();
+			$this->indent();
+			$this->write("return \$ret;\n");
 		}
-		$this->restore_pos();
-		$this->indent();
-		$this->write("return \$ret;\n");
 		$this->dec_indent();
 		$this->write("}\n\n");
 	}

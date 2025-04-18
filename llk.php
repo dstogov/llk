@@ -388,8 +388,10 @@ function complete_graph($gr) {
 function make_pred($gl, $gr, $neg = false) {
 	static $n = 0;
 	complete_graph($gr);
-	if ($gl === $gr && ($gl instanceof Terminal || $gl instanceof NonTerminal)) {
-		$name = "check_" . sym2name($gl->name, false);
+	if ($gl === $gr && $gl instanceof Terminal) {
+		$name = "synpred_" . sym2name($gl->name, false);
+	} else if ($gl === $gr && $gl instanceof NonTerminal) {
+		$name = "synpred_" . $gl->name;
 	} else {
 		$name = "synpred_" . ++$n;
 	}
@@ -2989,8 +2991,8 @@ function emit_code($grammar) {
 		}
 	  	foreach ($grammar->pred as $pred) {
 	  		// TODO: scanner ???
-			if (!$pred->start instanceof NonTerminal ||
-			    $pred->start->next != null) {
+			if ($pred->start->next != null
+			 || (!($pred->start instanceof NonTerminal) && !($pred->start instanceof Terminal))) {
 				$f->parser_synpred_start($pred);
 				emit_parser_code($f, $grammar, $pred->name, $pred->start, array(), isset($scan) ? $scan : null, 1);
 				$f->parser_synpred_end($pred);
