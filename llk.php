@@ -91,6 +91,95 @@ const IS_USED_IN_PRED = 0x40;
 const IS_VISITED      = 0x80;
 const IS_IGNORED      = 0x100;
 
+function sym2name($name, $uppercase = true) {
+	$const_name = "";
+	if ($name == '_') {
+		$const_name = 'UNDERSCORE';
+	} else {
+		$n = strlen($name);
+	    $ascii = true;
+		for ($i = 0; $i < $n; $i++) {
+			if (!(($name[$i] >= 'A' && $name[$i] <= 'Z') ||
+			      ($name[$i] >= 'a' && $name[$i] <= 'z') ||
+			      ($name[$i] >= '0' && $name[$i] <= '9') ||
+			      ($name[$i] == '_'))) {
+				$ascii = false;
+				break;
+			}
+		}
+		if ($ascii) {
+			for ($i = 0; $i < $n; $i++) {
+				if (($name[$i] >= 'a' && $name[$i] <= 'z')) {
+					$const_name .= chr(ord($name[$i]) - ord('a') + ord('A'));
+				} else {
+					$const_name .= $name[$i];
+				}
+			}
+		} else {
+			for ($i = 0; $i < $n; $i++) {
+				$const_name .= "_";
+				switch ($name[$i]) {
+					case "\r": $const_name .= 'CR'; break;
+					case "\n": $const_name .= 'LF'; break;
+					case "\t": $const_name .= 'TAB'; break;
+					case "\v": $const_name .= 'VT'; break;
+					case "\f": $const_name .= 'FF'; break;
+					case " " : $const_name .= "SPACE"; break;
+					case "!" : $const_name .= "BANG"; break;
+					case '"' : $const_name .= "DOUBLE_QUOTE"; break;
+					case "#" : $const_name .= "HASH"; break;
+					case "$" : $const_name .= "DOLLAR"; break;
+					case "%" : $const_name .= "PERCENT"; break;
+					case "&" : $const_name .= "AND"; break;
+					case "'" : $const_name .= "SINGLE_QUOTE"; break;
+					case "(" : $const_name .= "LPAREN"; break;
+					case ")" : $const_name .= "RPAREN"; break;
+					case "*" : $const_name .= "STAR"; break;
+					case "+" : $const_name .= "PLUS"; break;
+					case "," : $const_name .= "COMMA"; break;
+					case "-" : $const_name .= "MINUS"; break;
+					case "." : $const_name .= "POINT"; break;
+					case "/" : $const_name .= "SLASH"; break;
+					case ":" : $const_name .= "COLON"; break;
+					case ";" : $const_name .= "SEMICOLON"; break;
+					case "<" : $const_name .= "LESS"; break;
+					case "=" : $const_name .= "EQUAL"; break;
+					case ">" : $const_name .= "GREATER"; break;
+					case "?" : $const_name .= "QUERY"; break;
+					case "@" : $const_name .= "AT"; break;
+					case "[" : $const_name .= "LBRACK"; break;
+					case "\\": $const_name .= "BACK_SLASH"; break;
+					case "]" : $const_name .= "RBRACK"; break;
+					case "^" : $const_name .= "UPARROW"; break;
+					case "_" : $const_name .= "UNDERSCORE"; break;
+					case "`" : $const_name .= "ACCENT"; break;
+					case "{" : $const_name .= "LBRACE"; break;
+					case "|" : $const_name .= "BAR"; break;
+					case "}" : $const_name .= "RBRACE"; break;
+					case "~" : $const_name .= "TILDE"; break;
+					default:
+						if (($name[$i] >= 'A' && $name[$i] >= 'Z') ||
+						    ($name[$i] >= '0' && $name[$i] >= '9')) {
+							$const_name .= $name[$i];
+						} else if ($name[$i] >= 'a' && $name[$i] <= 'z') {
+							$const_name .= chr(ord($name[$i]) - ord('a') + ord('A'));
+						} else  {
+							$const_name .=
+								chr(ord('0') + (($c >> 6) % 8)) .
+								chr(ord('0') + (($c >> 3) % 8)) .
+								chr(ord('0') + ($c % 8));
+						}
+				}
+			}
+		}
+	}
+
+	if (!$uppercase) {
+		$const_name = strtolower($const_name);
+	}
+	return $const_name;
+}
+
 class TermDef {
 	public $name;
 	public $special;
@@ -100,89 +189,7 @@ class TermDef {
 		$this->name = $name;
 		$this->special = $special;
 		$this->val = $val;
-		if ($name == '_') {
-			$const_name = 'YY_UNDERSCORE';
-		} else {				
-			$n = strlen($name);
-		    $ascii = true;
-			for ($i = 0; $i < $n; $i++) {
-				if (!(($name[$i] >= 'A' && $name[$i] <= 'Z') ||
-				      ($name[$i] >= 'a' && $name[$i] <= 'z') ||
-				      ($name[$i] >= '0' && $name[$i] <= '9') ||
-		    		  ($name[$i] == '_'))) {
-					$ascii = false;
-					break;
-				}					
-			}
-			if ($ascii) {
-				$const_name = "YY_";
-				for ($i = 0; $i < $n; $i++) {
-					if (($name[$i] >= 'a' && $name[$i] <= 'z')) {
-						$const_name .= chr(ord($name[$i]) - ord('a') + ord('A'));
-					} else {
-						$const_name .= $name[$i];
-					}
-				}				
-			} else {
-				$const_name = "YY_";
-				for ($i = 0; $i < $n; $i++) {
-					$const_name .= "_";
-					switch ($name[$i]) {
-						case "\r": $const_name .= 'CR'; break;
-						case "\n": $const_name .= 'LF'; break;
-						case "\t": $const_name .= 'TAB'; break;
-						case "\v": $const_name .= 'VT'; break;
-						case "\f": $const_name .= 'FF'; break;
-						case " " : $const_name .= "SPACE"; break;
-						case "!" : $const_name .= "BANG"; break;
-						case '"' : $const_name .= "DOUBLE_QUOTE"; break;
-						case "#" : $const_name .= "HASH"; break;
-						case "$" : $const_name .= "DOLLAR"; break;
-						case "%" : $const_name .= "PERCENT"; break;
-						case "&" : $const_name .= "AND"; break;
-						case "'" : $const_name .= "SINGLE_QUOTE"; break;
-						case "(" : $const_name .= "LPAREN"; break;
-						case ")" : $const_name .= "RPAREN"; break;
-						case "*" : $const_name .= "STAR"; break;
-						case "+" : $const_name .= "PLUS"; break;
-						case "," : $const_name .= "COMMA"; break;
-						case "-" : $const_name .= "MINUS"; break;
-						case "." : $const_name .= "POINT"; break;
-						case "/" : $const_name .= "SLASH"; break;
-						case ":" : $const_name .= "COLON"; break;
-						case ";" : $const_name .= "SEMICOLON"; break;
-						case "<" : $const_name .= "LESS"; break;
-						case "=" : $const_name .= "EQUAL"; break;
-						case ">" : $const_name .= "GREATER"; break;
-						case "?" : $const_name .= "QUERY"; break;
-						case "@" : $const_name .= "AT"; break;
-						case "[" : $const_name .= "LBRACK"; break;
-						case "\\": $const_name .= "BACK_SLASH"; break;
-						case "]" : $const_name .= "RBRACK"; break;
-						case "^" : $const_name .= "UPARROW"; break;
-						case "_" : $const_name .= "UNDERSCORE"; break;
-						case "`" : $const_name .= "ACCENT"; break;
-						case "{" : $const_name .= "LBRACE"; break;
-						case "|" : $const_name .= "BAR"; break;
-						case "}" : $const_name .= "RBRACE"; break;
-						case "~" : $const_name .= "TILDE"; break;
-						default:
-							if (($name[$i] >= 'A' && $name[$i] >= 'Z') ||
-							    ($name[$i] >= '0' && $name[$i] >= '9')) {
-								$const_name .= $name[$i];
-							} else if ($name[$i] >= 'a' && $name[$i] <= 'z') {
-								$const_name .= chr(ord($name[$i]) - ord('a') + ord('A'));
-							} else  {
-								$const_name .=
-									chr(ord('0') + (($c >> 6) % 8)) .
-									chr(ord('0') + (($c >> 3) % 8)) .
-									chr(ord('0') + ($c % 8));									
-							}
-					}
-				}
-			}				
-		}
-		$this->const_name = $const_name;
+		$this->const_name = "YY_" . sym2name($name);
 	}
 }
 class NonTermDef {
@@ -381,7 +388,12 @@ function complete_graph($gr) {
 function make_pred($gl, $gr, $neg = false) {
 	static $n = 0;
 	complete_graph($gr);
-    return new SyntaticPredicate("synpred_" . ++$n, $gl, $neg);
+	if ($gl === $gr && ($gl instanceof Terminal || $gl instanceof NonTerminal)) {
+		$name = "check_" . sym2name($gl->name, false);
+	} else {
+		$name = "synpred_" . ++$n;
+	}
+	return new SyntaticPredicate($name, $gl, $neg);
 }
 
 /* ANALYZER */
