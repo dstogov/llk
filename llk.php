@@ -53,6 +53,23 @@ class SyntaticPredicate extends Predicate {
 	public $start = null;
 	public $neg = false;
 	function __construct($name, $start, $neg) {$this->name = $name; $this->start = $start; $this->neg = $neg;}
+	function is_simple() {
+		if ($this->start->next != null) {
+			return false;
+		} else if ($this->start instanceof Terminal) {
+			return true;
+		} else if ($this->start instanceof Alternative) {
+			$alt = $this->start;
+			do {
+				if ($alt->start->next != null || !($alt->start instanceof Terminal)) {
+					return false;
+				}
+				$alt = $alt->alt;
+			} while ($alt !== null);
+			return true;
+		}
+		return false;
+	}
 }
 class SemanticPredicate extends Predicate {
 	public $code = null;
@@ -2992,7 +3009,7 @@ function emit_code($grammar) {
 	  	foreach ($grammar->pred as $pred) {
 	  		// TODO: scanner ???
 			if ($pred->start->next != null
-			 || (!($pred->start instanceof NonTerminal) && !($pred->start instanceof Terminal))) {
+			 || (!($pred->start instanceof NonTerminal) && !$pred->is_simple())) {
 				$f->parser_synpred_start($pred);
 				emit_parser_code($f, $grammar, $pred->name, $pred->start, array(), isset($scan) ? $scan : null, 1);
 				$f->parser_synpred_end($pred);

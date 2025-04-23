@@ -1486,8 +1486,24 @@ EOF
 		$this->write("static int {$pred->name}($sym_type sym) {\n");
 		$this->inc_indent();
 		$this->indent();
-		if ($pred->start instanceof Terminal && $pred->start->next == null) {
-			$this->write("return sym == " . $this->grammar->term[$pred->start->name]->const_name . ";\n");
+		if ($pred->is_simple()) {
+			$set = array();
+			if ($pred->start instanceof Terminal) {
+				$set[$pred->start->name] = true;
+			} else if ($pred->start instanceof Alternative) {
+				$alt = $pred->start;
+				do {
+					if ($alt->start instanceof Terminal) {
+						$set[$alt->start->name] = true;
+					} else {
+						die("NIY?");
+					}
+					$alt = $alt->alt;
+				} while ($alt != null);
+			} else {
+				die("NIY?");
+			}
+			$this->write("return " . $this->gen_condition($set) . ";\n");
 		} else {
 			$this->write("$sym_type ret;\n");
 			$this->indent();
