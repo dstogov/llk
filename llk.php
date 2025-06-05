@@ -2898,6 +2898,9 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 				$f->write_code($p->code);
 			}
 		}
+		if (!($p instanceof Action) && !($p instanceof Predicate)) {
+			$checked = array();
+		}
 		$p = $p->up ? null : $p->next;
 	}
 }
