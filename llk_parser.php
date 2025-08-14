@@ -1917,15 +1917,15 @@ function parse_rule($sym, $grammar) {
 	if (in_array($sym, array(YY__AND,YY__BANG,YY__QUERY,YY_STRING,YY_IDENT,YY_IDENT_PLUS,YY__LPAREN,YY__LBRACE,YY__BAR,YY__SEMICOLON))) {
 		$sym = parse_expression($sym, $grammar, $gl, $gr);
 		complete_graph($gr);
-				$nt = new NonTermDef($id, $attrs, $code, $gl);
-				if ($lexer) {
-					$nt->lexer = new LexerDef($id . "_get_sym", $id . "_get_sym");
-				}
-				if (!isset($grammar->nonterm[$id])) {
-					$grammar->nonterm[$id] = $nt;
-				} else {
-					error("'$id' already defined");
-				}
+		$nt = new NonTermDef($id, $attrs, $code, $gl);
+		if ($lexer) {
+			$nt->lexer = new LexerDef($id . "_get_sym", $id . "_get_sym");
+		}
+		if (!isset($grammar->nonterm[$id])) {
+			$grammar->nonterm[$id] = $nt;
+		} else {
+			error("'$id' already defined");
+		}
 	} else if ($sym == YY__SLASH) {
 		$sym = parse_regexp($sym, $gl, $gr);
 		$rcode = null;
@@ -1933,20 +1933,20 @@ function parse_rule($sym, $grammar) {
 			$sym = parse_action($sym, $rcode);
 		}
 		complete_graph($gr);
-				$r = new RegExp($id, $gl);
-				$r->code = $rcode;
-				if (!isset($grammar->term[$id])) {
-					$grammar->term[$id] = new TermDef($id, count($grammar->term), true);
-				} else {
-					error("terminal '$id' already defined");
-				}
-				$nt = new NonTermDef($id, $attrs, $code, $r);
-				$gl->name = $id;
-				if (!isset($grammar->nonterm[$id])) {
-					$grammar->nonterm[$id] = $nt;
-				} else {
-					error("non-terminal '$id' already defined");
-				}
+		$r = new RegExp($id, $gl);
+		$r->code = $rcode;
+		if (!isset($grammar->term[$id])) {
+			$grammar->term[$id] = new TermDef($id, count($grammar->term), true);
+		} else {
+			error("terminal '$id' already defined");
+		}
+		$nt = new NonTermDef($id, $attrs, $code, $r);
+		$gl->name = $id;
+		if (!isset($grammar->nonterm[$id])) {
+			$grammar->nonterm[$id] = $nt;
+		} else {
+			error("non-terminal '$id' already defined");
+		}
 	} else {
 		error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 	}
@@ -1989,10 +1989,10 @@ function parse_expression($sym, $grammar, &$gl, &$gr) {
 		$gl2 = $gr2 = null;
 		$sym = parse_alternative($sym, $grammar, $gl2, $gr2);
 		if ($first) {
-					make_first_alt($gl, $gr);
-					$first = false;
-				}
-				concat_alt($gl, $gr, $gl2, $gr2);
+			make_first_alt($gl, $gr);
+			$first = false;
+		}
+		concat_alt($gl, $gr, $gl2, $gr2);
 	}
 	return $sym;
 }
@@ -2004,23 +2004,23 @@ function parse_alternative($sym, $grammar, &$gl, &$gr) {
 			$sym = get_sym();
 			$sym = parse_factor($sym, $grammar, $gl2, $gr2);
 			$gl = $gr = make_pred($gl2, $gr2);
-				if (!isset($grammar->pred[$gl->name])) {
-					$grammar->pred[$gl->name] = $gl;
-				}
-				$first = false;
+			if (!isset($grammar->pred[$gl->name])) {
+				$grammar->pred[$gl->name] = $gl;
+			}
+			$first = false;
 		} else if ($sym == YY__BANG) {
 			$sym = get_sym();
 			$sym = parse_factor($sym, $grammar, $gl2, $gr2);
 			$gl = $gr = make_pred($gl2, $gr2, true);
-				if (!isset($grammar->pred[$gl->name])) {
-					$grammar->pred[$gl->name] = $gl;
-				}
-				$first = false;
+			if (!isset($grammar->pred[$gl->name])) {
+				$grammar->pred[$gl->name] = $gl;
+			}
+			$first = false;
 		} else {
 			$sym = get_sym();
 			$sym = parse_action($sym, $code);
 			$gl = $gr = new SemanticPredicate($code);
-				$first = false;
+			$first = false;
 		}
 	}
 	while (in_array($sym, array(YY_STRING,YY_IDENT,YY_IDENT_PLUS,YY__LPAREN,YY__LBRACE))) {
@@ -2031,10 +2031,10 @@ function parse_alternative($sym, $grammar, &$gl, &$gr) {
 			$gl2 = $gr2 = new Action($code);
 		}
 		if ($first) {
-					$gl = $gl2; $gr = $gr2; $first = false;
-				} else {
-					concat_seq($gl, $gr, $gl2, $gr2);
-				}
+			$gl = $gl2; $gr = $gr2; $first = false;
+		} else {
+			concat_seq($gl, $gr, $gl2, $gr2);
+		}
 	}
 	if ($first) {
 				$gl = $gr = new Epsilon();
@@ -2091,9 +2091,9 @@ function parse_factor($sym, $grammar, &$gl, &$gr) {
 	if ($sym == YY_STRING) {
 		$sym = parse_terminal($sym, $t);
 		$gl = $gr = new Terminal($t);
-			if (!isset($grammar->term[$t])) {
-				$grammar->term[$t] = new TermDef($t, count($grammar->term));
-			}
+		if (!isset($grammar->term[$t])) {
+			$grammar->term[$t] = new TermDef($t, count($grammar->term));
+		}
 	} else if ($sym == YY_IDENT || $sym == YY_IDENT_PLUS) {
 		$sym = parse_nonterminal($sym, $grammar, $nt);
 		$gl = $gr = $nt;
@@ -2124,8 +2124,8 @@ function parse_nonterminal($sym, $grammar, &$nt) {
 		error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 	}
 	$nt = new NonTerminal($id);
-			$nt->attrs = $attrs;
-			$grammar->used[$id] = 1;
+	$nt->attrs = $attrs;
+	$grammar->used[$id] = 1;
 	return $sym;
 }
 
@@ -2217,10 +2217,10 @@ function parse_regex($sym, &$gl, &$gr) {
 		$sym = regexp2_get_sym();
 		$sym = parse_regex_alt($sym, $gl2, $gr2);
 		if ($first) {
-					make_first_alt($gl, $gr);
-					$first = false;
-				}
-				concat_alt($gl, $gr, $gl2, $gr2);
+			make_first_alt($gl, $gr);
+			$first = false;
+		}
+		concat_alt($gl, $gr, $gl2, $gr2);
 	}
 	return $sym;
 }
@@ -2231,10 +2231,10 @@ function parse_regex_alt($sym, &$gl, &$gr) {
 		do {
 			$sym = parse_regex_term($sym, $gl2, $gr2);
 			if ($first) {
-						$gl = $gl2; $gr = $gr2; $first = false;
-					} else {
-						concat_seq($gl, $gr, $gl2, $gr2);
-					}
+				$gl = $gl2; $gr = $gr2; $first = false;
+			} else {
+				concat_seq($gl, $gr, $gl2, $gr2);
+			}
 		} while (in_array($sym, array(YY__POINT,YY_ESCAPE_CHAR,YY_ESCAPE_CODE,YY_SINGLE_CHAR,YY__LBRACK,YY__LPAREN)));
 		if ($sym == YY__SLASH_SLASH) {
 			$sym = regexp2_get_sym();
@@ -2345,11 +2345,11 @@ function parse_escape_char($sym, &$ch) {
 		error("<escape_char> expected, got '{$GLOBALS['sym_name'][$sym]}'");
 	}
 	$ch = get_text(1);
-			if ($ch === 'n') $ch = "\n";
-			else if ($ch === 'r') $ch = "\r";
-			else if ($ch === 't') $ch = "\t";
-			else if ($ch === 'v') $ch = "\v";
-			else if ($ch === 'f') $ch = "\f";
+	if ($ch === 'n') $ch = "\n";
+	else if ($ch === 'r') $ch = "\r";
+	else if ($ch === 't') $ch = "\t";
+	else if ($ch === 'v') $ch = "\v";
+	else if ($ch === 'f') $ch = "\f";
 	$sym = regexp2_get_sym();
 	return $sym;
 }
@@ -2359,11 +2359,11 @@ function parse_escape_code($sym, &$ch) {
 		error("<escape_code> expected, got '{$GLOBALS['sym_name'][$sym]}'");
 	}
 	$oct = get_text(1);
-			$dec = 0;
-			for ($i = 0; $i < strlen($oct); $i++) {
-				$dec = ($dec * 8) + ($oct[$i] - ord('0'));
-			}
-			$ch = chr($dec);
+	$dec = 0;
+	for ($i = 0; $i < strlen($oct); $i++) {
+		$dec = ($dec * 8) + ($oct[$i] - ord('0'));
+	}
+	$ch = chr($dec);
 	$sym = regexp2_get_sym();
 	return $sym;
 }
@@ -2386,8 +2386,8 @@ function parse_regex_char_class($sym, &$set) {
 			$sym = regexp2_get_sym();
 			$sym = parse_regex_char($sym, $ch2);
 			for ($i = ord($ch1) + 1; $i <= ord($ch2); $i++) {
-						$set[chr($i)] = 1;
-					}
+				$set[chr($i)] = 1;
+			}
 		}
 	} while ($sym == YY_ESCAPE_CHAR || $sym == YY_ESCAPE_CODE || $sym == YY_SINGLE_CHAR);
 	return $sym;

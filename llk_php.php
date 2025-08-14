@@ -947,9 +947,32 @@ class PhpEmitter extends Emitter {
 	}
 
 	function write_code($code) {
-		$this->indent();
-		// TODO: format code
-		$this->write(trim($code) . "\n");
+		if ($code[0] != "\r" && $code[0] != "\n") {
+			$this->indent();
+			$this->write(trim($code) . "\n");
+		} else {
+			$lines = preg_split("/\r\n|\n|\r/", $code);
+			$line = $lines[1];
+			$len = 0;
+			while ($line[$len] == " " || $line[$len] == "\t") $len++;
+			$spaces = substr($line, 0, $len);
+			$n = count($lines);
+			for ($i = 1; $i < $n; $i++) {
+				$line = $lines[$i];
+				if (strncmp($line, $spaces, $len) == 0) {
+					$line = rtrim(substr($line, $len));
+					if ($i + 1 != $n || $line !== "") {
+						$this->indent();
+						$this->write($line . "\n");
+					}
+				} else {
+					$line = rtrim($line);
+					if ($i + 1 != $n || $line !== "") {
+						$this->write($line . "\n");
+					}
+				}
+			}
+		}
 	}
 
 	function parser_func_start($name, $first, $attrs) {
