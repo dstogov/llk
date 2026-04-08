@@ -3028,7 +3028,9 @@ function emit_code($grammar) {
 			}
 	  	}
 
-		$f->main("parse", $grammar->start, IGNORE_ATTRIBUTES ? null : $grammar->nonterm[$grammar->start]->attrs);
+		if (!isset($grammar->no_main) || !$grammar->no_main) {
+			$f->main("parse", $grammar->start, IGNORE_ATTRIBUTES ? null : $grammar->nonterm[$grammar->start]->attrs);
+		}
 	}
 
 	if ($grammar->epilogue !== null) {
