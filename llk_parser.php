@@ -2295,8 +2295,10 @@ function parse_regex_alt($sym, &$gl, &$gr) {
 			$sym = parse_regex_term($sym, $gl2, $gr2);
 			set_ctx($gl2); concat_seq($gl, $gr, $gl2, $gr2);
 		}
-	} else {
+	} else if ($sym == YY__BAR || $sym == YY__RPAREN || $sym == YY__SLASH) {
 		$gl = $gr = new Epsilon();
+	} else {
+		error("unexpected '{$GLOBALS['sym_name'][$sym]}'");
 	}
 	return $sym;
 }

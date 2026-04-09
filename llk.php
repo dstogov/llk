@@ -2790,8 +2790,7 @@ function emit_parser_code($f, $grammar, $nt, $p, $checked, $scanner, $in_pred = 
 			while ($q != null) {
 				if (!($q->start instanceof Predicate)) {
 					$set = comp_expected($grammar, $q->start, $nt);
-					if ($q->alt == null && ($everything_checked || nullable_graph($grammar, $q->start))) {
-						$everything_checked = true;
+					if ($q->alt == null && $everything_checked) {
 						if ($use_switch) {
 							$f->parser_default_case();
 						} else {
